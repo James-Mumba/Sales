@@ -1,0 +1,468 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+.App {
+  height: 100dvh;
+  width: 100dvw;
+}
+
+.box {
+  height: 360px;
+  width: 500px;
+  margin-left: 33%;
+  margin-top: 10%;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.box p {
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.bar {
+  height: 35px;
+  width: 260px;
+  border-radius: 10px;
+  padding-left: 10px;
+  border: none;
+  background-color: rgb(241, 241, 241);
+}
+
+.profile {
+  background: #000;
+  height: 80px;
+  width: 80px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+}
+
+.profile button {
+  height: 16px;
+  width: 20px;
+  border: none;
+  margin-top: 74%;
+  margin-left: 70%;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Navbar */
+.navbar {
+  height: 50px;
+  width: 100%;
+  background-color: hsla(212, 87%, 50%, 0.592);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.navbar input {
+  height: 30px;
+  width: 250px;
+  outline: none;
+  border: none;
+  border-radius: 10px;
+  padding-left: 10px;
+}
+
+.tafuta {
+  height: 100%;
+  width: 350px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search {
+  height: 28px;
+  width: 60px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.buttons {
+  height: 100%;
+  width: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.notification,
+.settings {
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  border: none;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.profileP {
+  height: 100%;
+  width: 230px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pic {
+  background-image: url(./Images/ppic.webp);
+  background-position: center;
+  background-size: cover;
+  height: 45px;
+  width: 45px;
+  border-radius: 50%;
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+/* End of Navbar */
+
+/* Sidebar */
+
+.sidebar {
+  background-color: hsla(212, 87%, 50%, 0.592);
+  width: 213px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.logo {
+  background-image: url(./Images/ACDI.jfif);
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  height: 80px;
+  position: absolute;
+  width: 80px;
+  border-radius: 50%;
+  top: 50px;
+  cursor: pointer;
+}
+
+.click {
+  text-decoration: none;
+  color: #000;
+  height: 45px;
+  width: 99%;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #efefef;
+  border: none;
+  cursor: pointer;
+}
+
+.click:hover {
+  /* background-color: rgba(87, 200, 252, 0.792); */
+  transition: ease-in-out 970ms;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  color: rgb(104, 216, 132);
+  font-size: 18px;
+  font-weight: 550;
+}
+
+.out {
+  position: absolute;
+  margin-top: 30%;
+  height: 30px;
+  width: 80px;
+  border: none;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.out:hover {
+  color: white;
+  transition: ease-in 990ms;
+  background-color: rgb(253, 44, 44);
+}
+
+/* End of SideBar */
+
+/* Start of Home */
+
+.home {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  background-color: tomato;
+}
+
+.container {
+  background: #f4f4f4;
+  height: 100%;
+  width: 90%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.box1 {
+  height: 40%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.left-half,
+.right-half {
+  height: 250px;
+  width: 500px;
+  margin: 0 25px;
+  border-radius: 15px;
+  background-color: rgb(253, 253, 253);
+}
+
+.left-half h4,
+.right-half h4 {
+  margin-left: 20px;
+}
+
+.cubes {
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+
+.uno,
+.dos,
+.tres,
+.quatro {
+  background-color: #efefef;
+  width: 230px;
+  height: 100px;
+}
+
+.box2 {
+  height: 44%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f4f4f4;
+}
+
+.inventory-Summary,
+.Product-details,
+.No-of-Users {
+  background: #fefefe;
+  height: 220px;
+  border-radius: 15px;
+  width: 340px;
+  margin: 0 20px;
+}
+
+.inventory-Summary p,
+.No-of-Users p {
+  font-weight: 550;
+  margin-left: 20px;
+  margin-bottom: 10px;
+  margin-top: 5px;
+}
+
+.Product-details p {
+  font-weight: 550;
+  margin-left: 20px;
+  margin-bottom: 10px;
+  margin-top: 5px;
+}
+
+.numb {
+  height: 78%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-content: space-evenly;
+}
+
+.amnt {
+  height: 80%;
+  width: 45%;
+  background-color: #f4cbcb;
+}
+
+/* Inventory */
+
+.inventory {
+  height: 100dvh;
+  width: 100dvw;
+  display: flex;
+  background-color: rgb(171, 54, 33);
+}
+
+.content {
+  background-color: rgb(255, 255, 255);
+  height: 100%;
+  width: 1324px;
+}
+
+.title {
+  background: #ffffff;
+  height: 45px;
+  width: 100%;
+}
+
+.small-top {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.small-top h4 {
+  left: 250px;
+  color: #010101;
+  position: absolute;
+}
+
+.sendReport,
+.print {
+  height: 28px;
+  width: 60px;
+  margin-right: 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.log {
+  font-size: 20px;
+}
+
+.log:hover {
+  color: rgb(73, 176, 217);
+}
+
+/* table */
+.table {
+  
+}
+.grey {
+  background-color: rgb(239, 239, 239);
+  height: 30px;
+  width: 160px;
+}
+
+.light {
+  background: #ffffff;
+}
+
+.edit,
+.delete {
+  height: 25px;
+  width: 25px;
+  margin-left: 20px;
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+}
+
+.btns {
+  font-size: 20px;
+}
+
+.blue:hover {
+  color: rgb(73, 176, 217);
+}
+
+.red:hover {
+  color: red;
+}
+/* End of Inventory */
+
+/* Sales */
+.sales {
+  height: 100dvh;
+  width: 100dvw;
+  background-color: wheat;
+  display: flex;
+}
+
+.content {
+  background-color: rgb(70, 120, 121);
+  height: 100%;
+  width: 90%;
+}
+
+.pay-page {
+  height: 62px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-content: space-between;
+  background: #806d6d;
+  margin-bottom: 5px;
+}
+
+.overdued {
+  height: 100%;
+  background: rgb(255, 38, 0);
+  width: 300px;
+  margin-left: 20px;
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.unpaid {
+  height: 100%;
+  background: rgb(253, 146, 107);
+  width: 300px;
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.paid {
+  height: 100%;
+  background: rgb(1, 201, 1);
+  width: 300px;
+  margin-right: 20px;
+  cursor: pointer;
+}
+
+.meza {
+  margin-left: 35px;
+  margin-top: 5px;
+  width: 95%;
+  overflow-y: scroll;
+}
+
+.wrap {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  padding-left: 10px;
+}
+
+.long {
+  width: 40%;
+  margin-top: 15px;
+}
