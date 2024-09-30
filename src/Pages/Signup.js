@@ -23,21 +23,21 @@ function Signup() {
         const userId = usercredential.user.uid;
         console.log(userId);
 
-        const guests = doc(collection(db, "clients-Data"));
+        const userDoc = doc(collection(db, "clients-Data", userId));
 
-        setDoc(guests, {
+        setDoc(userDoc, {
           user: person,
           email: email,
           userId: userId,
         })
           .then(() => {
-            window.location.reload();
+            // window.location.reload();
+            navigate("/Home");
           })
           .catch((error) => {
             const errorMessage = error.message;
             console.log(errorMessage);
           });
-        navigate("/Home");
       }
     );
   }

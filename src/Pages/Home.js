@@ -1,6 +1,13 @@
 import React from "react";
 import Navbar from "../Components/Navbar";
 import Sidebar from "../Components/Sidebar";
+import {
+  faDollarSign,
+  faHandHoldingDollar,
+  faMoneyBillTrendUp,
+  faSackDollar,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function Home() {
   return (
@@ -12,10 +19,26 @@ function Home() {
           <div className="left-half">
             <h4>Sales Overview</h4>
             <div className="cubes">
-              <div className="uno">1</div>
-              <div className="dos">2</div>
-              <div className="tres">3</div>
-              <div className="quatro">4</div>
+              <div className="uno">
+                <FontAwesomeIcon className="cup" icon={faSackDollar} />
+                <p className="total">Total Sales</p>
+                <p className="bold">90768</p>
+              </div>
+              <div className="dos">
+                <FontAwesomeIcon className="cup" icon={faMoneyBillTrendUp} />
+                <p className="total">Revenue</p>
+                <p className="bold">1571</p>
+              </div>
+              <div className="tres">
+                <FontAwesomeIcon className="cup" icon={faDollarSign} />
+                <p className="total">Cost</p>
+                <p className="bold">13671</p>
+              </div>
+              <div className="quatro">
+                <FontAwesomeIcon className="cup" icon={faHandHoldingDollar} />
+                <p className="total">Profit</p>
+                <p className="bold">2763</p>
+              </div>
             </div>
           </div>
           <div className="right-half">
@@ -38,13 +61,17 @@ function Home() {
           </div>
           <div className="Product-details">
             <p>Product Details</p>
-            <p>food <span>5654</span></p>
+            <p>
+              food <span>5654</span>
+            </p>
             <hr />
-            <p>food <span>5654</span></p>
+            <p>
+              food <span>5654</span>
+            </p>
             <hr />
-            <p>food <span>5654</span></p>
-            <hr />
-            <p>food <span>5654</span></p>
+            <p>
+              food <span>5654</span>
+            </p>
             <hr />
           </div>
           <div className="No-of-Users">

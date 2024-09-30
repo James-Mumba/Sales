@@ -26,11 +26,11 @@ function Sidebar() {
       <Link className="click" to={"/Inventroy"}>
         Inventory
       </Link>
+      <Link className="click" to={"/Requisition"}>
+      Cafe Requisition
+      </Link>
       <Link className="click" to={"/Sales"}>
         Sales
-      </Link>
-      <Link className="click" to={""}>
-        Option
       </Link>
       <Link className="click" to={""}>
         Option

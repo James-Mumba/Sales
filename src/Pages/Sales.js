@@ -18,108 +18,208 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
+import { jsPDF } from "jspdf";
 
 function Sales() {
   const auth = getAuth(app);
   const navigate = useNavigate();
 
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      navigate("/Signin");
-    }
-  });
-
   const [show, setShow] = useState(false);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  //fetching Data from firestore
   const [sales, setSales] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(""); // Track selected item
+  const [price, setPrice] = useState(0); // Track auto-filled price
+  const [quantity, setQuantity] = useState(1); // Default quantity
+  const [amountDue, setAmountDue] = useState(0); // Auto-calculated amount due
+  const [totalPaidCount, setTotalPaidCount] = useState(0);
+  const [totalPaidAmount, setTotalPaidAmount] = useState(0);
+  const [show1, setShowDel] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [unpaidSales, setUnpaidSales] = useState([]);
+  const [printedSales, setPrintedSales] = useState([]);
 
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const userId = user.uid;
-
-        const fetchData = async () => {
-          const q = query(
-            collection(db, "Sales-Data"),
-            where("userId", "==", userId)
-          );
-          let saleItems = [];
-          const querySnapshot = await getDocs(q);
-
-          querySnapshot.forEach((salesDoc) => {
-            saleItems.push({
-              id: salesDoc.id,
-              ...salesDoc.data(),
-            });
-            setSales([...saleItems]);
-          });
-        };
-        fetchData();
-      }
-    });
-  }, []);
-
-  //sending data to firestore
   const itemRef = useRef();
   const numberOfPcsRef = useRef();
   const priceRef = useRef();
   const customerRef = useRef();
   const amountDueRef = useRef();
 
-  function upload() {
-    const Item = itemRef.current.value;
+  const itemsPrices = {
+    "grilled Chuck bone-in": 2800,
+    "Choma Sausages pack": 2450,
+  };
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  const handleCloseDelete = () => setShowDel(false);
+  const handleShowDelete = () => setShowDel(true);
+
+  // Handle item selection change
+  const handleItemChange = (e) => {
+    const selected = e.target.value;
+    setSelectedItem(selected);
+    const selectedPrice = itemsPrices[selected] || 0;
+    setPrice(selectedPrice);
+    setAmountDue(selectedPrice * quantity);
+  };
+
+  // Calculate quantity change and recalculate amount due
+  const handleQuantityChange = (e) => {
+    const qty = parseInt(e.target.value);
+    setQuantity(qty);
+    setAmountDue(price * qty);
+  };
+
+  // Fetch sales data from Firestore
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const fetchData = async () => {
+          const q = query(
+            collection(db, "Sales-Data"),
+            where("userId", "==", user.uid)
+          );
+          let saleItems = [];
+          const querySnapshot = await getDocs(q);
+
+          querySnapshot.forEach(async (salesDoc) => {
+            const data = { id: salesDoc.id, ...salesDoc.data() };
+            const saleDate = new Date(data.date);
+            const now = new Date();
+            const timeDiff = now - saleDate; // Time difference in milliseconds
+            const fiveMinute = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+            if (data.status === "Open" && timeDiff > fiveMinute) {
+              data.status = "Overdue";
+              await setDoc(
+                doc(db, "Sales-Data", data.id),
+                { status: "Overdue" },
+                { merge: true }
+              );
+            }
+            saleItems.push(data);
+          });
+          setSales(saleItems);
+          calculatePaidTotals(saleItems);
+        };
+        fetchData();
+      } else {
+        navigate("/Signin");
+      }
+    });
+  }, [auth, navigate]);
+
+  // Calculate total paid count and amount
+  const calculatePaidTotals = (salesData) => {
+    const paidSales = salesData.filter((sale) => sale.status === "Paid");
+    const count = paidSales.length;
+    const totalAmount = paidSales.reduce((acc, sale) => acc + sale.debt, 0);
+    setTotalPaidCount(count);
+    setTotalPaidAmount(totalAmount);
+  };
+
+  // Function to handle uploading new sales
+  const upload = () => {
+    const selectedItem = itemRef.current.value;
     const pieces = numberOfPcsRef.current.value;
     const price = priceRef.current.value;
     const customersName = customerRef.current.value;
     const amountDue = pieces * price;
+    const date = new Date();
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
         const userId = user.uid;
-        console.log(userId);
-
         const newSales = doc(collection(db, "Sales-Data"));
-
-        setDoc(newSales, {
+        const saleData = {
           userId: userId,
-          item: Item,
-          pieces: pieces,
+          item: selectedItem,
+          pieces: quantity,
           price: price,
           Name: customersName,
           debt: amountDue,
-        })
+          date: date.toISOString(),
+          status: "Open",
+        };
+
+        setDoc(newSales, saleData, { merge: true })
           .then(() => {
+            setSales((prevSales) => [
+              ...prevSales,
+              { id: newSales.id, ...saleData },
+            ]);
+            handleClose();
             window.location.reload();
           })
-          .catch((error) => {
-            const errorMessage = error.message;
-            console.log(errorMessage);
-          });
+          .catch((error) => console.log(error.message));
       }
     });
-  }
+  };
 
-  //delete data on firestore
-  const deleteEntry = async (id) => {
-    try {
-      const docid = id;
+  // Function to handle payment received
+  const handlePaymentReceived = async (id) => {
+    const saleToUpdate = sales.find((sale) => sale.id === id);
 
-      await deleteDoc(doc(db, "Sales-Data", docid));
-      window.location.reload();
-    } catch (error) {
-      const errorMessage = error.message;
-      console.log(errorMessage);
+    if (saleToUpdate) {
+      const updatedSale = {
+        ...saleToUpdate,
+        status: "Paid",
+        paymentReceived: true,
+      };
+
+      // Update Firestore with new status
+      await setDoc(doc(db, "Sales-Data", id), updatedSale, { merge: true });
+
+      // Update local state
+      setSales((prevSales) =>
+        prevSales.map((sale) => (sale.id === id ? updatedSale : sale))
+      );
+
+      // Generate PDF after 2 minutes
+      setTimeout(() => {
+        generatePDF(updatedSale);
+      }, 2 * 60 * 1000);
     }
   };
 
-  const [show1, setShowDel] = useState(false);
+  // Function to delete sales entry
+  const deleteEntry = async (id) => {
+    try {
+      await deleteDoc(doc(db, "Sales-Data", id)); // Delete from Firestore
+      setSales((prevSales) => prevSales.filter((sale) => sale.id !== id)); // Update local state
+      console.log("Document deleted with ID:", id);
+    } catch (error) {
+      console.error("Error deleting document:", error.message);
+    }
+  };
 
-  const handleCloseDelete = () => setShowDel(false);
-  const handleShowDelete = () => setShowDel(true);
+  // Function to generate PDF for sales
+  const generatePDF = (saleData) => {
+    if (!saleData) {
+      setPrintedSales((prev) => [...prev, saleData]);
+      console.error("Sales data is missing.");
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.text(`Item Sold: ${saleData.item || "Unknown Item"}`, 10, 10);
+    doc.text(`Customer Name: ${saleData.Name || "Unknown Customer"}`, 10, 20);
+    doc.text(`Amount Due: ${saleData.debt || 0}`, 10, 30);
+    doc.text(`Status: ${saleData.status || "Unknown"}`, 10, 40);
+
+    if (saleData.status === "Paid") {
+      doc.text("PAID", 50, 50); // Placeholder for the "PAID" stamp
+    }
+
+    doc.save(`Sale_${saleData.id}.pdf`);
+    setUnpaidSales((prevUnpaidSales) => [...prevUnpaidSales, saleData]);
+  };
+
+  const isWithinAWeek = (saleDate) => {
+    const sale = new Date(saleDate);
+    const now = new Date();
+    const oneWeekInMilliseconds = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+    return now - sale <= oneWeekInMilliseconds;
+  };
 
   return (
     <div className="sales">
@@ -135,20 +235,42 @@ function Sales() {
               Amount Ksh <span>450</span>
             </p>
           </div>
-          <div className="unpaid">
+          <div className="unpaid" style={{ position: "relative" }}>
             <p>
-              <span>14 </span>Open Invoices
+              <span>{unpaidSales.length + printedSales.length}</span> Printed
+              Sales
             </p>
-            <p>
-              Amount Ksh<span> 2,893</span>
-            </p>
+            <p>Hover to view</p>
+
+            {/* Dropdown displayed on hover */}
+            <div
+              className="dropdown"
+              style={{
+                display: "none",
+                position: "absolute",
+                top: "100%",
+                left: "0",
+              }}
+            >
+              {unpaidSales
+                .concat(printedSales)
+                .filter((sale) => isWithinAWeek(sale.date)) // Filter to only show sales within a week
+                .map((sale, index) => (
+                  <div key={sale.id}>
+                    <p>
+                      {index + 1}. {sale.item} - {sale.debt} Ksh
+                    </p>
+                  </div>
+                ))}
+            </div>
           </div>
           <div className="paid">
             <p>
-              <span>12 </span>Paid
+              <span className="painNumber">{totalPaidCount}</span>Paid
             </p>
             <p>
-              Available Bal. Ksh<span> 1,234</span>
+              Available Bal. Ksh
+              <span className="paidTotal">{totalPaidAmount}</span>
             </p>
           </div>
         </div>
@@ -163,21 +285,55 @@ function Sales() {
           keyboard={false}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Modal title</Modal.Title>
+            <Modal.Title>New Sale</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div className="wrap">
               <label htmlFor="">Item Sold</label>
+              <Form.Select
+                value={selectedItem}
+                onChange={handleItemChange}
+                ref={itemRef}
+              >
+                <option disabled value="">
+                  Select an item
+                </option>
+                {Object.keys(itemsPrices).map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </Form.Select>
+
+              {/* <label htmlFor="">Accompaniment Sold</label>
               <input
                 type="text"
                 name=""
                 ref={itemRef}
-                id="itemSold"
-                placeholder="Gold FH Sausages"
+                id="AccompanimentSold"
+                placeholder="Fries"
               />
+              <label htmlFor="">Vegs Sold</label>
+              <input
+                type="text"
+                name=""
+                ref={itemRef}
+                id="Vegs Sold"
+                placeholder="Mixed Vegs"
+              />
+              <label htmlFor="">Drinks Sold</label>
+              <input
+                type="text"
+                name=""
+                ref={itemRef}
+                id="Vegs Sold"
+                placeholder="Dasani Btl Water"
+              /> */}
               <label htmlFor="">Number of pieces sold</label>
               <input
                 type="number"
+                value={quantity}
+                onChange={handleQuantityChange}
                 ref={numberOfPcsRef}
                 name=""
                 id="numberOfPcs"
@@ -187,6 +343,7 @@ function Sales() {
               <input
                 type="number"
                 ref={priceRef}
+                value={price}
                 name=""
                 id="Price"
                 placeholder="Price Per Piece"
@@ -202,16 +359,13 @@ function Sales() {
               <label htmlFor="amountDue">Amount Due</label>
               <input
                 disabled
+                value={amountDue}
                 type="number"
                 ref={amountDueRef}
                 name=""
                 id="amountDue"
                 placeholder="ksh 0.00"
               />
-              <Form.Select size="sm" className="long">
-                <option disabled>select status</option>
-                <option>Open</option>
-              </Form.Select>
             </div>
           </Modal.Body>
           <Modal.Footer>
@@ -233,25 +387,42 @@ function Sales() {
               <th>Price/Piece</th>
               <th>Customer's Name'</th>
               <th>Amount Due</th>
-
               <th>Status</th>
               <th>Edit Data</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {sales.map((salesDoc) => (
+            {sales.map((salesDoc, index) => (
               <tr key={salesDoc.id}>
-                <td>1</td>
-                <td>23/09/2024</td>
+                <td>{index + 1}</td>
+                <td>{new Date(salesDoc.date).toLocaleDateString("en-GB")}</td>
                 <td>{salesDoc.item}</td>
                 <td>{salesDoc.pieces}</td>
                 <td>{salesDoc.price}</td>
                 <td>{salesDoc.Name} </td>
                 <td>{salesDoc.debt} </td>
-                <td>Open</td>
+                <td
+                  style={{
+                    color:
+                      salesDoc.status === "Overdue"
+                        ? "red"
+                        : salesDoc.status === "Paid"
+                        ? "lightgreen"
+                        : "black",
+                    fontWeight: salesDoc.status === "Open" ? "bold" : "normal",
+                  }}
+                >
+                  {salesDoc.status}
+                </td>
                 <td>
-                  <Button variant="primary" onClick={handleShowDelete}>
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      setItemToDelete(salesDoc.id); // Store the ID of the item to be deleted
+                      handleShowDelete();
+                    }}
+                  >
                     Delete Entry
                   </Button>
                   <Modal
@@ -261,19 +432,24 @@ function Sales() {
                     keyboard={false}
                   >
                     <Modal.Header closeButton>
-                      <Modal.Title>Modal title</Modal.Title>
+                      <Modal.Title>Delete</Modal.Title>
                     </Modal.Header>
-                    <Modal.Body>
+                    <Modal.Body className="delete-modal">
                       <p>Deleting Entry</p>
-                      <p> Are yo sure?</p>
+                      <p> Are you sure?</p>
                     </Modal.Body>
                     <Modal.Footer>
                       <Button variant="secondary" onClick={handleCloseDelete}>
                         Close
                       </Button>
                       <Button
-                        variant="primary"
-                        onClick={() => deleteEntry(salesDoc.id)}
+                        variant="danger"
+                        onClick={() => {
+                          if (itemToDelete) {
+                            deleteEntry(itemToDelete); // Pass the stored ID to delete
+                          }
+                          handleCloseDelete();
+                        }}
                       >
                         Delete
                       </Button>
@@ -281,11 +457,21 @@ function Sales() {
                   </Modal>
                 </td>
                 <td>
-                  <Form.Select size="sm">
-                    <option>Print</option>
-                    <option>Payment Received</option>
-                    <option>Copy to invoice</option>
-                  </Form.Select>
+                  <Button
+                    variant="primary"
+                    onClick={() => handlePaymentReceived(salesDoc.id)}
+                    disabled={salesDoc.paymentReceived}
+                  >
+                    Payment Received
+                  </Button>
+                  {salesDoc.status === "Paid" && (
+                    <Button
+                      variant="danger"
+                      onClick={() => generatePDF(salesDoc)}
+                    >
+                      Print
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}
