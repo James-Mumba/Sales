@@ -19,6 +19,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   query,
   setDoc,
@@ -119,24 +120,17 @@ function Inventroy() {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         const userId = user.uid;
-        console.log(userId);
-        const fetchData = async () => {
-          const q = query(
-            collection(db, "clients-Data")
-            // where("userId", "==", userId)
-          );
-          let clientsNames = [];
-          const querySnapshot = await getDocs(q);
+        const fetchUserData = async () => {
+          const docRef = doc(db, "clients-Data", userId);
+          const docSnapshot = await getDoc(docRef);
 
-          querySnapshot.forEach((clientsDoc) => {
-            clientsNames.push({
-              id: clientsDoc.id,
-              ...clientsDoc.data(),
-            });
-          });
-          setUser(clientsNames); // Update after loop
+          if (docSnapshot.exists()) {
+            setUser([docSnapshot.data()]);
+          } else {
+            console.log("No such document!");
+          }
         };
-        fetchData();
+        fetchUserData();
       }
     });
   }, [auth]);
