@@ -106,6 +106,57 @@
   cursor: pointer;
 }
 
+.noty-display {
+  background-color: hsla(214, 33%, 91%, 0.892);
+  height: 270px;
+  width: 290px;
+  position: absolute;
+  border: 1px solid gray;
+  border-bottom: ridge 8px;
+  border-radius: 0 0 10px 10px;
+  top: 100%;
+}
+
+.noty-display h6 {
+  margin-left: 10px;
+}
+
+.noty-content {
+  height: 82%;
+  width: 94%;
+  margin-left: 8px;
+  overflow-y: auto;
+  padding-left: 5px;
+  line-height: 0.7rem;
+  /* padding-top: 15px; */
+}
+
+.box-1-noty {
+  background-color: #dfdfdf;
+  height: 46px;
+  width: 95%;
+  margin-top: 10px;
+}
+
+.box-1-noty:hover {
+  border: outset 4px;
+  cursor: pointer;
+  line-height: 0.4rem;
+  transition: ease-in-out 990ms;
+}
+
+.clear {
+  border: none;
+  position: absolute;
+  bottom: 0;
+  right: 26px;
+  height: 18px;
+  width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+}
 .profileP {
   height: 100%;
   width: 230px;
@@ -282,7 +333,6 @@
   font-weight: 550;
 }
 
-
 .box2 {
   height: 44%;
   width: 100%;
@@ -358,14 +408,40 @@
   height: 100%;
   width: 100%;
   justify-content: center;
-  justify-content: flex-end;
   align-items: center;
 }
 
 .small-top h4 {
-  left: 250px;
+  margin-left: -2%;
+  margin-right: 72%;
   color: #010101;
-  position: absolute;
+  /* position: absolute; */
+}
+
+.mbody {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  
+}
+
+.mbody label{
+  margin-top: 10px;
+  color: #acacac;
+}
+
+.mbody input {
+  border: none;
+  border-bottom: ridge 2px;
+  outline: none;
+  
+}
+
+.table {
+  width: 75%;
+  margin-left: 40px;
+  overflow-y: auto;
 }
 
 .sendReport,
@@ -378,11 +454,23 @@
   cursor: pointer;
 }
 
+.sendReport {
+  background-color: #ebebeb;
+  color: #000;
+}
+
+.log1 {
+  font-size: 22px;
+  margin-bottom: 5px;
+  margin-top: -3px;
+}
+
 .log {
   font-size: 20px;
 }
 
-.log:hover {
+.log:hover,
+log1:hover {
   color: rgb(73, 176, 217);
 }
 
@@ -417,6 +505,85 @@
 .red:hover {
   color: red;
 }
+
+.requested {
+  right: 0;
+  margin-right: 20px;
+  border-radius: 10px;
+  border-style: outset;
+  top: 18%;
+  height: 550px;
+  width: 250px;
+  background: #e4e4e4;
+  position: absolute;
+  overflow-y: auto;
+}
+
+.order-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.order-content:hover {
+  background-color: #ffffff;
+  transition: ease-in-out 500ms;
+}
+
+.icon {
+  height: 80%;
+  color: #f1f1f1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #43c0f6;
+  font-size: 18px;
+  width: 50px;
+  margin-right: 5px;
+  border-radius: 50%;
+}
+
+.icon-name {
+  height: 80%;
+  width: 70%;
+  padding-top: 5px;
+  line-height: 0.5em;
+  background-color: #f1f1f1;
+}
+
+.icon-name-head {
+  color: #acacac;
+  margin-left: 5px;
+  font-size: 16px;
+  font-weight: 550;
+  padding-left: 2px;
+}
+
+.check {
+  font-size: 14px;
+  margin-left: 5px;
+  color: rgb(113, 255, 47);
+}
+
+.icon-item {
+  margin-top: -14px;
+  font-size: 14px;
+  color: #a9a9a9;
+  margin-left: 5px;
+}
+
+.icon-date {
+  margin-top: -10px;
+  padding-left: 2px;
+  font-size: 14px;
+  margin-left: 5px;
+  color: #c7c7c7;
+}
+
 /* End of Inventory */
 
 /* Sales */
@@ -429,7 +596,7 @@
 }
 
 .content {
-  background-color: rgb(70, 120, 121);
+  background-color: rgb(244, 244, 244);
   height: 100%;
   width: 90%;
   overflow-x: hidden;
@@ -442,23 +609,19 @@
   align-items: center;
   justify-content: center;
   justify-content: space-between;
-  background: #806d6d;
+  background: #f1f1f1;
   margin-bottom: 5px;
-}
-
-.overdued {
-  height: 100%;
-  background: rgb(255, 38, 0);
-  width: 300px;
-  margin-left: 20px;
-  margin-right: 20px;
-  cursor: pointer;
 }
 
 .unpaid {
   height: 100%;
   background: rgb(253, 146, 107);
   width: 300px;
+  margin-left: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
   margin-right: 20px;
   cursor: pointer;
 }
@@ -473,6 +636,11 @@
   width: 300px;
   margin-right: 20px;
   cursor: pointer;
+  margin-left: 20px;
+}
+
+.mb {
+  margin-left: 20px;
 }
 
 .meza {
@@ -481,14 +649,14 @@
   width: 95%;
 }
 
-.delete-modal{
+.delete-modal {
   display: flex;
   justify-content: center;
   flex-direction: column;
   align-items: center;
 }
 
-.delete-modal p{
+.delete-modal p {
   font-size: 20px;
   font-weight: 550;
 }

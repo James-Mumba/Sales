@@ -44,8 +44,24 @@ function Sales() {
   const amountDueRef = useRef();
 
   const itemsPrices = {
-    "grilled Chuck bone-in": 2800,
+    "Grilled Sirloin Steak": 1070,
+    "Grilled Ribeye Steak": 2180,
+    "Grilled Rump Steak": 1350,
+    "Grilled T-Bone Steak": 1670,
+    "Grilled Chuck Bone-in": 870,
+    "Grilled T-Bone Steak with Accompaniments": 2170,
+    "Grilled Rump Steak with Accompaniments": 1850,
+    "Grilled Ribeye Steak with Accompaniments": 2680,
+    "Sirloin Steak with Accompaniments": 1570,
+    "Grilled Chuck Bone-in with Accompaniments": 1370,
     "Choma Sausages pack": 2450,
+    "Choma Sausage 2@": 350,
+    "Burger Patti 1@": 220,
+    "Samosa 2@": 150,
+    "Samosa 1@": 75,
+    Omellete: 150,
+    "Omellete, Tea/ Coffee": 400,
+    "Tea/ Coffee": 250,
   };
 
   const handleClose = () => setShow(false);
@@ -214,56 +230,12 @@ function Sales() {
     setUnpaidSales((prevUnpaidSales) => [...prevUnpaidSales, saleData]);
   };
 
-  const isWithinAWeek = (saleDate) => {
-    const sale = new Date(saleDate);
-    const now = new Date();
-    const oneWeekInMilliseconds = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-    return now - sale <= oneWeekInMilliseconds;
-  };
-
   return (
     <div className="sales">
       <Sidebar />
       <div className="content">
         <Navbar />
         <div className="pay-page">
-          <div className="overdued">
-            <p>
-              <span>2</span> Overdue Payments
-            </p>
-            <p>
-              Amount Ksh <span>450</span>
-            </p>
-          </div>
-          <div className="unpaid" style={{ position: "relative" }}>
-            <p>
-              <span>{unpaidSales.length + printedSales.length}</span> Printed
-              Sales
-            </p>
-            <p>Hover to view</p>
-
-            {/* Dropdown displayed on hover */}
-            <div
-              className="dropdown"
-              style={{
-                display: "none",
-                position: "absolute",
-                top: "100%",
-                left: "0",
-              }}
-            >
-              {unpaidSales
-                .concat(printedSales)
-                .filter((sale) => isWithinAWeek(sale.date)) // Filter to only show sales within a week
-                .map((sale, index) => (
-                  <div key={sale.id}>
-                    <p>
-                      {index + 1}. {sale.item} - {sale.debt} Ksh
-                    </p>
-                  </div>
-                ))}
-            </div>
-          </div>
           <div className="paid">
             <p>
               <span className="painNumber">{totalPaidCount}</span>Paid
@@ -274,8 +246,8 @@ function Sales() {
             </p>
           </div>
         </div>
-        <Button variant="primary" className="mb--" onClick={handleShow}>
-          Record
+        <Button variant="primary" className="mb" onClick={handleShow}>
+          Sell
         </Button>
 
         <Modal
@@ -304,31 +276,6 @@ function Sales() {
                   </option>
                 ))}
               </Form.Select>
-
-              {/* <label htmlFor="">Accompaniment Sold</label>
-              <input
-                type="text"
-                name=""
-                ref={itemRef}
-                id="AccompanimentSold"
-                placeholder="Fries"
-              />
-              <label htmlFor="">Vegs Sold</label>
-              <input
-                type="text"
-                name=""
-                ref={itemRef}
-                id="Vegs Sold"
-                placeholder="Mixed Vegs"
-              />
-              <label htmlFor="">Drinks Sold</label>
-              <input
-                type="text"
-                name=""
-                ref={itemRef}
-                id="Vegs Sold"
-                placeholder="Dasani Btl Water"
-              /> */}
               <label htmlFor="">Number of pieces sold</label>
               <input
                 type="number"
@@ -373,7 +320,7 @@ function Sales() {
               Close
             </Button>
             <Button variant="primary" onClick={upload}>
-              Buy
+              Sell
             </Button>
           </Modal.Footer>
         </Modal>
@@ -423,7 +370,7 @@ function Sales() {
                       handleShowDelete();
                     }}
                   >
-                    Delete Entry
+                    Delete
                   </Button>
                   <Modal
                     show={show1}
@@ -458,11 +405,11 @@ function Sales() {
                 </td>
                 <td>
                   <Button
-                    variant="primary"
+                    variant="warning"
                     onClick={() => handlePaymentReceived(salesDoc.id)}
                     disabled={salesDoc.paymentReceived}
                   >
-                    Payment Received
+                    $$Received
                   </Button>
                   {salesDoc.status === "Paid" && (
                     <Button

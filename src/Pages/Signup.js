@@ -3,7 +3,7 @@ import { Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { app, db } from "../Firebase";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
 function Signup() {
   const userNameRef = useRef();
@@ -23,7 +23,7 @@ function Signup() {
         const userId = usercredential.user.uid;
         console.log(userId);
 
-        const userDoc = doc(collection(db, "clients-Data", userId));
+        const userDoc = doc(db, "clients-Data", userId);
 
         setDoc(userDoc, {
           user: person,
