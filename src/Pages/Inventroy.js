@@ -19,10 +19,10 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDoc,
   getDocs,
   query,
   setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 
@@ -120,17 +120,24 @@ function Inventroy() {
     onAuthStateChanged(auth, (user) => {
       if (user) {
         const userId = user.uid;
-        const fetchUserData = async () => {
-          const docRef = doc(db, "clients-Data", userId);
-          const docSnapshot = await getDoc(docRef);
+        console.log(userId);
+        const fetchData = async () => {
+          const q = query(
+            collection(db, "clients-Data"),
+            where("userId", "==", userId)
+          );
+          let clientsNames = [];
+          const querySnapshot = await getDocs(q);
 
-          if (docSnapshot.exists()) {
-            setUser([docSnapshot.data()]);
-          } else {
-            console.log("No such document!");
-          }
+          querySnapshot.forEach((clientsDoc) => {
+            clientsNames.push({
+              id: clientsDoc.id,
+              ...clientsDoc.data(),
+            });
+          });
+          setUser(clientsNames); // Update after loop
         };
-        fetchUserData();
+        fetchData();
       }
     });
   }, [auth]);
@@ -152,6 +159,47 @@ function Inventroy() {
       console.log(errorMessage);
     }
   };
+
+  //Update
+
+  const [change, setUpdateChange] = useState(false);
+
+  const handleUpdateClose = () => setUpdateChange(false);
+  const handleUpdateShow = () => setUpdateChange(true);
+
+  const changeInventory = async (id, newData) => {
+    try {
+      const docid = id;
+      const docRef = doc(db, "store-Inventory", docid);
+
+      await updateDoc(docRef, newData);
+      window.location.reload();
+    } catch (error) {
+      const errorMessage = error.message;
+      console.log(errorMessage);
+    }
+    handleUpdateShow();
+
+    window.changeInventory = function () {
+      const quantity = quantityRef.current.value;
+      const portion = portionRef.current.value;
+
+      const changeInventory = doc(db, "store-Inventory", id);
+      updateDoc(changeInventory, {
+        Weight: quantity,
+        Portion: portion,
+      })
+        .then(() => {
+          window.location.reload();
+        })
+        .catch((error) => {
+          const errorMessage = error.message;
+          console.log(errorMessage);
+        });
+    };
+  };
+
+  //end of Update
 
   return (
     <div className="inventory">
@@ -230,6 +278,44 @@ function Inventroy() {
             </button>
           </div>
         </div>
+
+        <Modal
+          show={change}
+          onHide={handleClose}
+          backdrop="static"
+          keyboard={false}
+          animation={true}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Update</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <label htmlFor="Item Quantity">Quantity</label>
+            <input
+              type="text"
+              name=""
+              id=""
+              ref={quantityRef}
+              placeholder="1 kg"
+            />
+            <label htmlFor="Portion">Portion</label>
+            <input
+              type="text"
+              name=""
+              id=""
+              ref={portionRef}
+              placeholder="2 ptns"
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleUpdateClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={window.changeInventory}>
+              Update
+            </Button>
+          </Modal.Footer>
+        </Modal>
         <table className="table">
           <thead>
             <tr>
@@ -257,9 +343,13 @@ function Inventroy() {
                   {user.length > 0 ? user[0].user : "No user found"}
                 </td>
                 <td className="light">
-                  <button className="edit">
+                  <Button
+                    variant="warning"
+                    onClick={() => changeInventory(storeageDoc.id)}
+                  >
                     <FontAwesomeIcon className="btns blue" icon={faFilePen} />
-                  </button>
+                  </Button>
+
                   <button
                     className="delete"
                     onClick={() => deleteData(storeageDoc.id)}

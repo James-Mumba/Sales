@@ -2,10 +2,6 @@
   margin: 0;
   padding: 0;
 }
-.App {
-  height: 100dvh;
-  width: 100dvw;
-}
 
 .box {
   height: 360px;
@@ -382,6 +378,8 @@
   background-color: #f4cbcb;
 }
 
+/* End of Home */
+
 /* Inventory */
 
 .inventory {
@@ -409,6 +407,7 @@
   width: 100%;
   justify-content: center;
   align-items: center;
+  border-bottom: ridge;
 }
 
 .small-top h4 {
@@ -423,10 +422,9 @@
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  
 }
 
-.mbody label{
+.mbody label {
   margin-top: 10px;
   color: #acacac;
 }
@@ -435,12 +433,12 @@
   border: none;
   border-bottom: ridge 2px;
   outline: none;
-  
 }
 
 .table {
   width: 75%;
   margin-left: 40px;
+  margin-top: 5px;
   overflow-y: auto;
 }
 
@@ -647,6 +645,13 @@ log1:hover {
   margin-left: 35px;
   margin-top: 5px;
   width: 95%;
+}
+
+.select {
+  width: 200px;
+  outline: none;
+  border: none;
+  border-bottom: solid 1px lightgrey;
 }
 
 .delete-modal {

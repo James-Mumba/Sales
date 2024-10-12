@@ -101,8 +101,8 @@ function Sales() {
             const data = { id: salesDoc.id, ...salesDoc.data() };
             const saleDate = new Date(data.date);
             const now = new Date();
-            const timeDiff = now - saleDate; // Time difference in milliseconds
-            const fiveMinute = 5 * 60 * 1000; // 5 minutes in milliseconds
+            const timeDiff = now - saleDate;
+            const fiveMinute = 5 * 60 * 1000;
 
             if (data.status === "Open" && timeDiff > fiveMinute) {
               data.status = "Overdue";
@@ -230,6 +230,9 @@ function Sales() {
     setUnpaidSales((prevUnpaidSales) => [...prevUnpaidSales, saleData]);
   };
 
+
+  
+
   return (
     <div className="sales">
       <Sidebar />
@@ -264,6 +267,7 @@ function Sales() {
               <label htmlFor="">Item Sold</label>
               <Form.Select
                 value={selectedItem}
+                className="select"
                 onChange={handleItemChange}
                 ref={itemRef}
               >
@@ -355,7 +359,7 @@ function Sales() {
                       salesDoc.status === "Overdue"
                         ? "red"
                         : salesDoc.status === "Paid"
-                        ? "lightgreen"
+                        ? "darkgreen"
                         : "black",
                     fontWeight: salesDoc.status === "Open" ? "bold" : "normal",
                   }}

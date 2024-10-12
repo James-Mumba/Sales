@@ -80,8 +80,8 @@ function Navbar() {
 
         const fetchData = async () => {
           const q = query(
-            collection(db, "clients-Data")
-            // where("userId", "==", userId)
+            collection(db, "clients-Data"),
+            where("userId", "==", userId)
           );
           let clientsNames = [];
           const querySnapshot = await getDocs(q);
