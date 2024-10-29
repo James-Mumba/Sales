@@ -36,40 +36,7 @@ function Navbar() {
     };
   }, []);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [previousSearches, setPreviousSearches] = useState([]);
-
-  const handleSearch = async (event) => {
-    const value = event.target.value;
-    setSearchTerm(value);
-
-    if (value.trim() !== "") {
-      // Perform Firestore search query
-      const q = query(
-        collection(db, "Sales-Data"),
-        where("item", ">=", value),
-        where("item", "<=", value + "\uf8ff") // For prefix matching
-      );
-
-      const querySnapshot = await getDocs(q);
-      let results = [];
-      querySnapshot.forEach((doc) => {
-        results.push({ id: doc.id, ...doc.data() });
-      });
-      setSearchResults(results);
-
-      // Store this search for future suggestions
-      const updatedSearches = [...previousSearches, value];
-      const uniqueSearches = [...new Set(updatedSearches)]; // Avoid duplicates
-      setPreviousSearches(uniqueSearches);
-      localStorage.setItem("previousSearches", JSON.stringify(uniqueSearches));
-    } else {
-      setSearchResults([]); // Clear search results if input is empty
-    }
-  };
-
-  //fetch user
+  // Fetch user
   const [user, setUser] = useState([]);
 
   useEffect(() => {
@@ -104,38 +71,19 @@ function Navbar() {
       <div className="tafuta">
         <input
           type="search"
+          disabled
           name=""
           id="search"
           placeholder="Search here"
-          onFocus={() => setSearchResults(previousSearches)}
         />
-        <button className="search" type="submit">
+
+        <button disabled className="search" type="submit">
           search
         </button>
       </div>
       <div className="buttons">
         <button className="notification" onClick={toggleNotyDisplay}>
           <FontAwesomeIcon className="log" icon={faBell} />
-          {searchTerm === "" && previousSearches.length > 0 && (
-            <ul>
-              {previousSearches.map((search, index) => (
-                <li key={index} onClick={() => setSearchTerm(search)}>
-                  {search}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Display search results */}
-          {searchTerm !== "" && searchResults.length > 0 && (
-            <ul>
-              {searchResults.map((result) => (
-                <li key={result.id}>
-                  {result.item} - {result.pieces} pcs
-                </li>
-              ))}
-            </ul>
-          )}
         </button>
         {showNoty && (
           <div className="noty-display" ref={notyRef}>

@@ -16,6 +16,7 @@ import {
   getDocs,
   query,
   setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { jsPDF } from "jspdf";
@@ -230,8 +231,60 @@ function Sales() {
     setUnpaidSales((prevUnpaidSales) => [...prevUnpaidSales, saleData]);
   };
 
+  async function handleSale(selectedItems, portionsSold) {
+  const salesDate = new Date().toLocaleString(); // Get current date and time
+  try {
+    // Query the store inventory to get items matching selected names
+    const q = query(collection(db, "store-Inventory"), where("Product", "in", selectedItems));
+    const querySnapshot = await getDocs(q);
 
-  
+    let matchedItems = [];
+    querySnapshot.forEach((doc) => {
+      matchedItems.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+
+    if (matchedItems.length >= 2) { // Ensure at least 2 matching items
+      for (const item of matchedItems) {
+        // Check if portions are enough
+        if (item.Portion >= portionsSold) {
+          const newPortionCount = item.Portion - portionsSold;
+
+          // Update the portion count in Firestore
+          const docRef = doc(db, "store-Inventory", item.id);
+          await updateDoc(docRef, {
+            Portion: newPortionCount,
+          });
+
+          // Send notification after successful sale
+          await sendNotification(item.Product, salesDate);
+
+        } else {
+          alert(`Not enough portions for ${item.Product}`);
+        }
+      }
+    } else {
+      alert("Not enough matching items found in inventory");
+    }
+  } catch (error) {
+    console.error("Error selling items:", error.message);
+  }
+}
+
+// Function to send notification to the inventory page
+async function sendNotification(itemName, salesDate) {
+  const notificationData = {
+    title: "Item Sold",
+    item: itemName,
+    date: salesDate,
+  };
+
+  const notificationDoc = doc(collection(db, "inventory-notifications"));
+  await setDoc(notificationDoc, notificationData);
+}
+ 
 
   return (
     <div className="sales">

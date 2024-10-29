@@ -172,6 +172,34 @@
   cursor: pointer;
 }
 
+.search-results-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: white;
+  border: 1px solid #ddd;
+  max-height: 200px;
+  overflow-y: auto;
+  position: absolute;
+  z-index: 10;
+  width: 100%;
+}
+
+.search-result-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.search-result-item:hover {
+  background-color: #f0f0f0;
+}
+
+.dropdown-header {
+  font-weight: bold;
+  padding: 10px;
+  background-color: #f7f7f7;
+}
+
 /* End of Navbar */
 
 /* Sidebar */
@@ -187,10 +215,9 @@
 }
 
 .logo {
-  background-image: url(./Images/ACDI.jfif);
+  background-image: url(./Images/Acdi\ small.jpg);
   background-position: center;
   background-size: contain;
-  background-repeat: no-repeat;
   height: 80px;
   position: absolute;
   width: 80px;
@@ -248,15 +275,13 @@
   height: 100vh;
   width: 100vw;
   display: flex;
-  background-color: tomato;
+  background-color: #f4f4f4;
 }
 
 .container {
   background: #f4f4f4;
   height: 100%;
-  width: 90%;
-  margin: 0;
-  padding: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -525,6 +550,8 @@ log1:hover {
   margin-bottom: 10px;
   border-radius: 10px;
   cursor: pointer;
+  background: #dddddd;
+  border-bottom: ridge;
 }
 
 .order-content:hover {
