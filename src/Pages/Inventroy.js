@@ -1,420 +1,3 @@
-// import React, { useEffect, useRef, useState } from "react";
-// import Sidebar from "../Components/Sidebar";
-// import Navbar from "../Components/Navbar";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import {
-//   faCartShopping,
-//   faCircleCheck,
-//   faFilePen,
-//   faPlus,
-//   faPrint,
-//   faTrashCan,
-// } from "@fortawesome/free-solid-svg-icons";
-// import { getAuth, onAuthStateChanged } from "firebase/auth";
-// import { app, db } from "../Firebase";
-// import { useNavigate } from "react-router-dom";
-// import Modal from "react-bootstrap/Modal";
-// import Button from "react-bootstrap/Button";
-// import {
-//   collection,
-//   deleteDoc,
-//   doc,
-//   getDocs,
-//   query,
-//   setDoc,
-//   updateDoc,
-//   where,
-// } from "firebase/firestore";
-
-// function Inventroy() {
-//   const auth = getAuth(app);
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     const unsubscribe = onAuthStateChanged(auth, (user) => {
-//       if (!user) {
-//         navigate("/Signin");
-//       }
-//     });
-
-//     // Cleanup the subscription on unmount
-//     return () => unsubscribe();
-//   }, [auth, navigate]);
-
-//   const [show, setShow] = useState(false);
-
-//   const handleClose = () => setShow(false);
-//   const handleShow = () => setShow(true);
-//   const [storage, setStorage] = useState([]);
-
-//   //fetch
-//   useEffect(() => {
-//     onAuthStateChanged(auth, (user) => {
-//       if (user) {
-//         const userId = user.uid;
-
-//         const fetchData = async () => {
-//           const q = query(
-//             collection(db, "store-Inventory"),
-//             where("userId", "==", userId)
-//           );
-//           let storedItems = [];
-//           const querySnapshot = await getDocs(q);
-
-//           querySnapshot.forEach((storeageDoc) => {
-//             storedItems.push({
-//               id: storeageDoc.id,
-//               ...storeageDoc.data(),
-//             });
-//             setStorage([...storedItems]);
-//           });
-//         };
-//         fetchData();
-//       }
-//     });
-//   }, [auth]);
-
-//   //send to firestore
-//   const nameItemRef = useRef();
-//   const companyRef = useRef();
-//   const groupRef = useRef();
-//   const quantityRef = useRef();
-//   const portionRef = useRef();
-
-//   function store() {
-//     const product = nameItemRef.current.value;
-//     const supplier = companyRef.current.value;
-//     const itemGroup = groupRef.current.value;
-//     const quantity = quantityRef.current.value;
-//     const portion = portionRef.current.value;
-
-//     onAuthStateChanged(auth, (user) => {
-//       if (user) {
-//         const userId = user.uid;
-
-//         const dataInventory = doc(collection(db, "store-Inventory"));
-
-//         setDoc(dataInventory, {
-//           userId: userId,
-//           Product: product,
-//           Supplier: supplier,
-//           Group: itemGroup,
-//           Weight: quantity,
-//           Portion: portion,
-//         })
-//           .then(() => {
-//             window.location.reload();
-//           })
-//           .catch((error) => {
-//             const errorMessage = error.message;
-//             console.log(errorMessage);
-//           });
-//       }
-//     });
-//   }
-
-//   //fetch user
-//   const [user, setUser] = useState([]);
-
-//   useEffect(() => {
-//     onAuthStateChanged(auth, (user) => {
-//       if (user) {
-//         const userId = user.uid;
-//         console.log(userId);
-//         const fetchData = async () => {
-//           const q = query(
-//             collection(db, "clients-Data"),
-//             where("userId", "==", userId)
-//           );
-//           let clientsNames = [];
-//           const querySnapshot = await getDocs(q);
-
-//           querySnapshot.forEach((clientsDoc) => {
-//             clientsNames.push({
-//               id: clientsDoc.id,
-//               ...clientsDoc.data(),
-//             });
-//           });
-//           setUser(clientsNames); // Update after loop
-//         };
-//         fetchData();
-//       }
-//     });
-//   }, [auth]);
-
-//   const generateUniqueCode = () => {
-//     return Math.random().toString(36).substr(2, 5).toUpperCase();
-//   };
-
-//   //Delete
-
-//   const deleteData = async (id) => {
-//     try {
-//       const docid = id;
-
-//       await deleteDoc(doc(db, "store-Inventory", docid));
-//       window.location.reload();
-//     } catch (error) {
-//       const errorMessage = error.message;
-//       console.log(errorMessage);
-//     }
-//   };
-
-//   //Update
-
-//   const [change, setUpdateChange] = useState(false);
-
-//   const handleUpdateClose = () => setUpdateChange(false);
-//   const handleUpdateShow = () => setUpdateChange(true);
-
-//   const changeInventory = async (id, newData) => {
-//     try {
-//       const docid = id;
-//       const docRef = doc(db, "store-Inventory", docid);
-
-//       await updateDoc(docRef, newData);
-//       window.location.reload();
-//     } catch (error) {
-//       const errorMessage = error.message;
-//       console.log(errorMessage);
-//     }
-//     handleUpdateShow();
-
-//     window.changeInventory = function () {
-//       const quantity = quantityRef.current.value;
-//       const portion = portionRef.current.value;
-
-//       const changeInventory = doc(db, "store-Inventory", id);
-//       updateDoc(changeInventory, {
-//         Weight: quantity,
-//         Portion: portion,
-//       })
-//         .then(() => {
-//           window.location.reload();
-//         })
-//         .catch((error) => {
-//           const errorMessage = error.message;
-//           console.log(errorMessage);
-//         });
-//     };
-//   };
-
-//   //end of Update
-
-//   function InventoryNotifications() {
-//     const [notifications, setNotifications] = useState([]);
-
-//     // Fetch notifications from Firestore
-//     useEffect(() => {
-//       const fetchNotifications = async () => {
-//         const notificationQuery = await getDocs(
-//           collection(db, "inventory-notifications")
-//         );
-//         const notificationList = [];
-
-//         notificationQuery.forEach((doc) => {
-//           notificationList.push({
-//             id: doc.id,
-//             ...doc.data(),
-//           });
-//         });
-//         setNotifications(notificationList);
-//       };
-
-//       fetchNotifications();
-//     }, []);
-
-//     return (
-//       <div className="inventory">
-//         <Sidebar />
-//         <div className="content">
-//           <Navbar />
-//           <div className="title">
-//             <div className="small-top">
-//               <h4>Inventory</h4>
-//               <Button onClick={handleShow} className="sendReport">
-//                 <FontAwesomeIcon className="log1" icon={faPlus} />
-//               </Button>
-
-//               <Modal
-//                 show={show}
-//                 onHide={handleClose}
-//                 backdrop="static"
-//                 keyboard={false}
-//               >
-//                 <Modal.Header closeButton>
-//                   <Modal.Title>Add Stock</Modal.Title>
-//                 </Modal.Header>
-//                 <Modal.Body className="mbody">
-//                   <label htmlFor="Item Name">Item Name</label>
-//                   <input
-//                     type="text"
-//                     name=""
-//                     id=""
-//                     ref={nameItemRef}
-//                     placeholder="Chuck Bone-in"
-//                   />
-//                   <label htmlFor="Suppliers">Company Name</label>
-//                   <input
-//                     type="text"
-//                     name=""
-//                     id=""
-//                     ref={companyRef}
-//                     placeholder="Ongole Beef LTD"
-//                   />
-//                   <label htmlFor="Item Name">Item Group</label>
-//                   <input
-//                     type="text"
-//                     name=""
-//                     id=""
-//                     ref={groupRef}
-//                     placeholder="Beef"
-//                   />
-//                   <label htmlFor="Item Quantity">Quantity</label>
-//                   <input
-//                     type="text"
-//                     name=""
-//                     id=""
-//                     ref={quantityRef}
-//                     placeholder="1 kg"
-//                   />
-//                   <label htmlFor="Portion">Portion</label>
-//                   <input
-//                     type="text"
-//                     name=""
-//                     id=""
-//                     ref={portionRef}
-//                     placeholder="2 ptns"
-//                   />
-//                 </Modal.Body>
-//                 <Modal.Footer>
-//                   <Button variant="secondary" onClick={handleClose}>
-//                     Close
-//                   </Button>
-//                   <Button variant="primary" onClick={store}>
-//                     Add
-//                   </Button>
-//                 </Modal.Footer>
-//               </Modal>
-//               <button className="print">
-//                 <FontAwesomeIcon className="log" icon={faPrint} />
-//               </button>
-//             </div>
-//           </div>
-
-//           <Modal
-//             show={change}
-//             onHide={handleClose}
-//             backdrop="static"
-//             keyboard={false}
-//             animation={true}
-//           >
-//             <Modal.Header closeButton>
-//               <Modal.Title>Update</Modal.Title>
-//             </Modal.Header>
-//             <Modal.Body>
-//               <label htmlFor="Item Quantity">Quantity</label>
-//               <input
-//                 type="text"
-//                 name=""
-//                 id=""
-//                 ref={quantityRef}
-//                 placeholder="1 kg"
-//               />
-//               <label htmlFor="Portion">Portion</label>
-//               <input
-//                 type="text"
-//                 name=""
-//                 id=""
-//                 ref={portionRef}
-//                 placeholder="2 ptns"
-//               />
-//             </Modal.Body>
-//             <Modal.Footer>
-//               <Button variant="secondary" onClick={handleUpdateClose}>
-//                 Close
-//               </Button>
-//               <Button variant="primary" onClick={window.changeInventory}>
-//                 Update
-//               </Button>
-//             </Modal.Footer>
-//           </Modal>
-//           <table className="table">
-//             <thead>
-//               <tr>
-//                 <th className="grey">Item Code</th>
-//                 <th className="grey">Item Name</th>
-//                 <th className="grey">Ordered From</th>
-//                 <th className="grey">Item Group</th>
-//                 <th className="grey">Quantity</th>
-//                 <th className="grey">Portions</th>
-//                 <th className="grey">Purchased By</th>
-//                 <th className="grey">Actions</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {storage.map((storeageDoc) => (
-//                 <tr key={storeageDoc.id}>
-//                   <td className="light">{generateUniqueCode()}</td>
-//                   <td className="light">{storeageDoc.Product}</td>
-//                   <td className="light">{storeageDoc.Supplier}</td>
-//                   <td className="light">{storeageDoc.Group}</td>
-//                   <td className="light">{storeageDoc.Weight}</td>
-//                   <td className="light">{storeageDoc.Portion}</td>
-//                   <td className="light">
-//                     {" "}
-//                     {user.length > 0 ? user[0].user : "No user found"}
-//                   </td>
-//                   <td className="light">
-//                     <Button
-//                       variant="warning"
-//                       onClick={() => changeInventory(storeageDoc.id)}
-//                     >
-//                       <FontAwesomeIcon className="btns blue" icon={faFilePen} />
-//                     </Button>
-
-//                     <button
-//                       className="delete"
-//                       onClick={() => deleteData(storeageDoc.id)}
-//                     >
-//                       <FontAwesomeIcon className="btns red" icon={faTrashCan} />
-//                     </button>
-//                   </td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//           <div className="requested">
-//             <div className="order-title">
-//               <h4>Order History</h4>
-//             </div>
-//             <hr />
-//             <div className="order-content">
-//               <div className="icon">
-//                 <FontAwesomeIcon icon={faCartShopping} />
-//               </div>
-//               {notifications.map((notification) => (
-//                 <div key={notification.id} className="icon-name">
-//                   <p className="icon-name-head">
-//                     <strong>{notification.title}</strong>
-//                     <FontAwesomeIcon className="check" icon={faCircleCheck} />
-//                   </p>
-//                   <p className="icon-item">
-//                     <small>{notification.item}</small>
-//                   </p>
-//                   <p className="icon-date">{notification.date}</p>
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   }
-// }
-
-// export default Inventroy;
-
 import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "../Components/Sidebar";
 import Navbar from "../Components/Navbar";
@@ -437,7 +20,6 @@ import {
   doc,
   getDocs,
   query,
-  setDoc,
   updateDoc,
   where,
   addDoc,
@@ -456,6 +38,8 @@ function Inventory() {
   const groupRef = useRef();
   const quantityRef = useRef();
   const portionRef = useRef();
+
+  const [showClearMessage, setShowClearMessage] = useState(false); // State to manage "All Clear" message
 
   // Centralized Authentication Check
   useEffect(() => {
@@ -545,16 +129,16 @@ function Inventory() {
     fetchNotifications();
   }, []);
 
-  // Add Notification
-  const addNotification = async (itemSold) => {
-    const newNotification = {
-      title: "Item Sold",
-      item: itemSold.Product,
-      date: new Date().toLocaleString(),
-    };
+  const clearNotifications = () => {
+    setNotifications([]);
+    setShowClearMessage(true);
+  };
 
-    await addDoc(collection(db, "inventory-notifications"), newNotification);
-    setNotifications((prev) => [...prev, newNotification]); // Update state without re-fetching
+  const deleteNotification = async (id) => {
+    await deleteDoc(doc(db, "inventory-notifications", id));
+    setNotifications((prevNotifications) =>
+      prevNotifications.filter((notification) => notification.id !== id)
+    );
   };
 
   return (
@@ -575,8 +159,8 @@ function Inventory() {
               <tr>
                 <th>#</th>
                 <th>Product</th>
-                <th>Supplier</th>
-                <th>Group</th>
+                <th>User</th>
+                <th>Category</th>
                 <th>Weight</th>
                 <th>Portion</th>
                 <th>Actions</th>
@@ -593,12 +177,13 @@ function Inventory() {
                   <td>{item.Portion}</td>
                   <td>
                     <Button
-                      variant="warning"
+                      // variant="warning"
                       onClick={() => handleUpdateShow(item)}
                     >
-                      <FontAwesomeIcon icon={faFilePen} />
+                      <FontAwesomeIcon className="pen" icon={faFilePen} />
                     </Button>
                     <Button
+                      className="pen"
                       variant="danger"
                       onClick={() => deleteData(item.id)}
                     >
@@ -613,17 +198,28 @@ function Inventory() {
 
         {/* Notifications */}
         {/* Notifications */}
+
         <div className="requested">
           <div className="order-title">
             <h4>Order History</h4>
           </div>
           <hr />
-          <div className="order-content">
-            <div className="icon">
-              <FontAwesomeIcon icon={faCartShopping} />
+
+          {/* Show "All Clear" message if there are no notifications */}
+          {showClearMessage ? (
+            <div className="all-clear" style={{ color: "grey" }}>
+              All Clear
             </div>
-            {notifications.map((notification) => (
-              <div  key={notification.id} >
+          ) : (
+            notifications.map((notification) => (
+              <div
+                key={notification.id}
+                onClick={() => deleteNotification(notification.id)}
+                className="order-content"
+              >
+                <div className="icon">
+                  <FontAwesomeIcon icon={faCartShopping} />
+                </div>
                 <p className="icon-name-head">
                   <strong>{notification.title}</strong>
                   <FontAwesomeIcon className="check" icon={faCircleCheck} />
@@ -633,8 +229,14 @@ function Inventory() {
                 </p>
                 <p className="icon-date">{notification.date}</p>
               </div>
-            ))}
-          </div>
+            ))
+          )}
+          {/* Conditionally render the Clear button if there are notifications */}
+          {notifications.length > 0 && (
+            <Button variant="secondary" onClick={clearNotifications}>
+              Hide
+            </Button>
+          )}
         </div>
 
         {/* Modal for Adding or Updating */}
@@ -645,40 +247,39 @@ function Inventory() {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <label>Item Name</label>
-            <input
-              type="text"
-              ref={nameItemRef}
-              defaultValue={updateItem ? updateItem.Product : ""}
-            />
-
-            <label>Supplier</label>
-            <input
-              type="text"
-              ref={companyRef}
-              defaultValue={updateItem ? updateItem.Supplier : ""}
-            />
-
-            <label>Group</label>
-            <input
-              type="text"
-              ref={groupRef}
-              defaultValue={updateItem ? updateItem.Group : ""}
-            />
-
-            <label>Quantity</label>
-            <input
-              type="text"
-              ref={quantityRef}
-              defaultValue={updateItem ? updateItem.Weight : ""}
-            />
-
-            <label>Portion</label>
-            <input
-              type="text"
-              ref={portionRef}
-              defaultValue={updateItem ? updateItem.Portion : ""}
-            />
+            <div className="wrap">
+              <label>Item Name</label>
+              <input
+                type="text"
+                ref={nameItemRef}
+                defaultValue={updateItem ? updateItem.Product : ""}
+              />
+              <label>User</label>
+              <input
+                type="text"
+                ref={companyRef}
+                defaultValue={updateItem ? updateItem.Supplier : ""}
+              />
+              <label>Group/ Type</label>
+              <input
+                type="text"
+                ref={groupRef}
+                placeholder="Snack..."
+                defaultValue={updateItem ? updateItem.Group : ""}
+              />
+              <label>Quantity in Kgs</label>
+              <input
+                type="text"
+                ref={quantityRef}
+                defaultValue={updateItem ? updateItem.Weight : ""}
+              />
+              <label>No. of Portion</label>
+              <input
+                type="text"
+                ref={portionRef}
+                defaultValue={updateItem ? updateItem.Portion : ""}
+              />
+            </div>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShow(false)}>

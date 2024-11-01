@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "../Components/Navbar";
 import Sidebar from "../Components/Sidebar";
 import {
@@ -8,8 +8,22 @@ import {
   faSackDollar,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useNavigate } from "react-router-dom";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { app } from "../Firebase";
 
 function Home() {
+  const navigate = useNavigate();
+  const auth = getAuth(app);
+
+  useEffect(() => {
+    const vamos = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        navigate("/Signin");
+      }
+    });
+    return () => vamos();
+  }, [auth, navigate]);
   return (
     <div className="home">
       <Sidebar />

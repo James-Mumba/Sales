@@ -25,18 +25,23 @@ function Sales() {
   const auth = getAuth(app);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (!user) navigate("/Signin");
+    });
+    return () => unsub();
+  }, [auth, navigate]);
+
   const [show, setShow] = useState(false);
   const [sales, setSales] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(""); // Track selected item
-  const [price, setPrice] = useState(0); // Track auto-filled price
-  const [quantity, setQuantity] = useState(1); // Default quantity
-  const [amountDue, setAmountDue] = useState(0); // Auto-calculated amount due
+  const [selectedItem, setSelectedItem] = useState("");
+  const [price, setPrice] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [amountDue, setAmountDue] = useState(0);
   const [totalPaidCount, setTotalPaidCount] = useState(0);
   const [totalPaidAmount, setTotalPaidAmount] = useState(0);
-  const [show1, setShowDel] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
-  const [unpaidSales, setUnpaidSales] = useState([]);
-  const [printedSales, setPrintedSales] = useState([]);
 
   const itemRef = useRef();
   const numberOfPcsRef = useRef();
@@ -45,32 +50,30 @@ function Sales() {
   const amountDueRef = useRef();
 
   const itemsPrices = {
-    "Grilled Sirloin Steak": 1070,
-    "Grilled Ribeye Steak": 2180,
-    "Grilled Rump Steak": 1350,
-    "Grilled T-Bone Steak": 1670,
-    "Grilled Chuck Bone-in": 870,
-    "Grilled T-Bone Steak with Accompaniments": 2170,
-    "Grilled Rump Steak with Accompaniments": 1850,
-    "Grilled Ribeye Steak with Accompaniments": 2680,
-    "Sirloin Steak with Accompaniments": 1570,
-    "Grilled Chuck Bone-in with Accompaniments": 1370,
+    "Sirloin Steak": 1070,
+    "Ribeye Steak": 2180,
+    "Rump Steak": 1350,
+    "T-Bone Steak": 1670,
+    "Chuck Bone-in": 870,
+    "T-Bone Steak with Accompaniments": 2170,
+    "Rump Steak with Accompaniments": 1850,
+    "Ribeye Steak with Accompaniments": 2680,
+    "Steak with Accompaniments": 1570,
+    "Chuck Bone-in with Accompaniments": 1370,
     "Choma Sausages pack": 2450,
     "Choma Sausage 2@": 350,
     "Burger Patti 1@": 220,
-    "Samosa 2@": 150,
-    "Samosa 1@": 75,
-    Omellete: 150,
+    "Samosa ": 75,
+    "Omellete ": 150,
     "Omellete, Tea/ Coffee": 400,
     "Tea/ Coffee": 250,
   };
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  const handleCloseDelete = () => setShowDel(false);
-  const handleShowDelete = () => setShowDel(true);
+  const handleCloseDelete = () => setShowDeleteModal(false);
+  const handleShowDelete = () => setShowDeleteModal(true);
 
-  // Handle item selection change
   const handleItemChange = (e) => {
     const selected = e.target.value;
     setSelectedItem(selected);
@@ -79,14 +82,12 @@ function Sales() {
     setAmountDue(selectedPrice * quantity);
   };
 
-  // Calculate quantity change and recalculate amount due
   const handleQuantityChange = (e) => {
     const qty = parseInt(e.target.value);
     setQuantity(qty);
     setAmountDue(price * qty);
   };
 
-  // Fetch sales data from Firestore
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -100,32 +101,16 @@ function Sales() {
 
           querySnapshot.forEach(async (salesDoc) => {
             const data = { id: salesDoc.id, ...salesDoc.data() };
-            const saleDate = new Date(data.date);
-            const now = new Date();
-            const timeDiff = now - saleDate;
-            const fiveMinute = 5 * 60 * 1000;
-
-            if (data.status === "Open" && timeDiff > fiveMinute) {
-              data.status = "Overdue";
-              await setDoc(
-                doc(db, "Sales-Data", data.id),
-                { status: "Overdue" },
-                { merge: true }
-              );
-            }
             saleItems.push(data);
           });
           setSales(saleItems);
           calculatePaidTotals(saleItems);
         };
         fetchData();
-      } else {
-        navigate("/Signin");
       }
     });
-  }, [auth, navigate]);
+  }, [auth]);
 
-  // Calculate total paid count and amount
   const calculatePaidTotals = (salesData) => {
     const paidSales = salesData.filter((sale) => sale.status === "Paid");
     const count = paidSales.length;
@@ -134,7 +119,77 @@ function Sales() {
     setTotalPaidAmount(totalAmount);
   };
 
-  // Function to handle uploading new sales
+  async function handleSale(selectedItems, portionsSold) {
+    const salesDate = new Date().toLocaleString();
+
+    try {
+      // Fetch all items from the inventory
+      const inventorySnapshot = await getDocs(
+        collection(db, "store-Inventory")
+      );
+      let matchedItems = [];
+
+      // Loop through each inventory item to find partial matches
+      inventorySnapshot.forEach((doc) => {
+        const inventoryItem = doc.data();
+        const inventoryProductName = inventoryItem.Product.toLowerCase();
+
+        // Check if the inventory item name contains parts of the selected item
+        const isMatch = selectedItems.some((selected) => {
+          const selectedItemName = selected.toLowerCase();
+          const selectedWords = selectedItemName.split(" ");
+
+          // Match on exact or partial words (first or first two words)
+          return (
+            inventoryProductName.includes(selectedItemName) ||
+            inventoryProductName.includes(
+              selectedWords.slice(0, 1).join(" ")
+            ) ||
+            (selectedWords.length > 1 &&
+              inventoryProductName.includes(
+                selectedWords.slice(0, 2).join(" ")
+              ))
+          );
+        });
+
+        // If matched, push the inventory item to the list
+        if (isMatch) {
+          matchedItems.push({ id: doc.id, ...inventoryItem });
+        }
+      });
+
+      if (matchedItems.length >= 1) {
+        for (const item of matchedItems) {
+          if (item.Portion >= portionsSold) {
+            const newPortionCount = item.Portion - portionsSold;
+            const docRef = doc(db, "store-Inventory", item.id);
+            await updateDoc(docRef, {
+              Portion: newPortionCount,
+            });
+            await sendNotification(item.Product, salesDate);
+          } else {
+            alert(`Not enough portions for ${item.Product}`);
+          }
+        }
+      } else {
+        alert("No matching items found in inventory.");
+      }
+    } catch (error) {
+      console.error("Error selling items:", error.message);
+    }
+  }
+
+  async function sendNotification(itemName, salesDate) {
+    const notificationData = {
+      title: "Item Sold",
+      item: itemName,
+      date: salesDate,
+    };
+
+    const notificationDoc = doc(collection(db, "inventory-notifications"));
+    await setDoc(notificationDoc, notificationData);
+  }
+
   const upload = () => {
     const selectedItem = itemRef.current.value;
     const pieces = numberOfPcsRef.current.value;
@@ -165,14 +220,40 @@ function Sales() {
               { id: newSales.id, ...saleData },
             ]);
             handleClose();
-            window.location.reload();
+            handleSale([selectedItem], pieces);
           })
           .catch((error) => console.log(error.message));
       }
     });
   };
 
-  // Function to handle payment received
+  useEffect(() => {
+    const checkForOverdueSales = async () => {
+      const currentTime = new Date();
+
+      const updatedSales = await Promise.all(
+        sales.map(async (sale) => {
+          if (
+            sale.status === "Open" &&
+            currentTime - new Date(sale.date) > 1 * 60 * 1000 // 1 minute
+          ) {
+            const updatedSale = { ...sale, status: "Overdue" };
+            await updateDoc(doc(db, "Sales-Data", sale.id), {
+              status: "Overdue",
+            });
+            return updatedSale;
+          }
+          return sale;
+        })
+      );
+
+      setSales(updatedSales);
+    };
+
+    const intervalId = setInterval(checkForOverdueSales, 1 * 60 * 1000); // Check every minute
+    return () => clearInterval(intervalId); // Cleanup interval on component unmount
+  }, [sales]);
+
   const handlePaymentReceived = async (id) => {
     const saleToUpdate = sales.find((sale) => sale.id === id);
 
@@ -183,39 +264,30 @@ function Sales() {
         paymentReceived: true,
       };
 
-      // Update Firestore with new status
       await setDoc(doc(db, "Sales-Data", id), updatedSale, { merge: true });
 
-      // Update local state
       setSales((prevSales) =>
         prevSales.map((sale) => (sale.id === id ? updatedSale : sale))
       );
 
-      // Generate PDF after 2 minutes
       setTimeout(() => {
         generatePDF(updatedSale);
-      }, 2 * 60 * 1000);
+      }, 1 * 60 * 1000);
     }
   };
 
-  // Function to delete sales entry
   const deleteEntry = async (id) => {
     try {
-      await deleteDoc(doc(db, "Sales-Data", id)); // Delete from Firestore
-      setSales((prevSales) => prevSales.filter((sale) => sale.id !== id)); // Update local state
-      console.log("Document deleted with ID:", id);
+      await deleteDoc(doc(db, "Sales-Data", id));
+      setSales((prevSales) => prevSales.filter((sale) => sale.id !== id));
+      handleCloseDelete();
     } catch (error) {
       console.error("Error deleting document:", error.message);
     }
   };
 
-  // Function to generate PDF for sales
   const generatePDF = (saleData) => {
-    if (!saleData) {
-      setPrintedSales((prev) => [...prev, saleData]);
-      console.error("Sales data is missing.");
-      return;
-    }
+    if (!saleData) return;
 
     const doc = new jsPDF();
     doc.text(`Item Sold: ${saleData.item || "Unknown Item"}`, 10, 10);
@@ -224,67 +296,11 @@ function Sales() {
     doc.text(`Status: ${saleData.status || "Unknown"}`, 10, 40);
 
     if (saleData.status === "Paid") {
-      doc.text("PAID", 50, 50); // Placeholder for the "PAID" stamp
+      doc.text("PAID", 50, 50);
     }
 
     doc.save(`Sale_${saleData.id}.pdf`);
-    setUnpaidSales((prevUnpaidSales) => [...prevUnpaidSales, saleData]);
   };
-
-  async function handleSale(selectedItems, portionsSold) {
-  const salesDate = new Date().toLocaleString(); // Get current date and time
-  try {
-    // Query the store inventory to get items matching selected names
-    const q = query(collection(db, "store-Inventory"), where("Product", "in", selectedItems));
-    const querySnapshot = await getDocs(q);
-
-    let matchedItems = [];
-    querySnapshot.forEach((doc) => {
-      matchedItems.push({
-        id: doc.id,
-        ...doc.data(),
-      });
-    });
-
-    if (matchedItems.length >= 2) { // Ensure at least 2 matching items
-      for (const item of matchedItems) {
-        // Check if portions are enough
-        if (item.Portion >= portionsSold) {
-          const newPortionCount = item.Portion - portionsSold;
-
-          // Update the portion count in Firestore
-          const docRef = doc(db, "store-Inventory", item.id);
-          await updateDoc(docRef, {
-            Portion: newPortionCount,
-          });
-
-          // Send notification after successful sale
-          await sendNotification(item.Product, salesDate);
-
-        } else {
-          alert(`Not enough portions for ${item.Product}`);
-        }
-      }
-    } else {
-      alert("Not enough matching items found in inventory");
-    }
-  } catch (error) {
-    console.error("Error selling items:", error.message);
-  }
-}
-
-// Function to send notification to the inventory page
-async function sendNotification(itemName, salesDate) {
-  const notificationData = {
-    title: "Item Sold",
-    item: itemName,
-    date: salesDate,
-  };
-
-  const notificationDoc = doc(collection(db, "inventory-notifications"));
-  await setDoc(notificationDoc, notificationData);
-}
- 
 
   return (
     <div className="sales">
@@ -303,7 +319,7 @@ async function sendNotification(itemName, salesDate) {
           </div>
         </div>
         <Button variant="primary" className="mb" onClick={handleShow}>
-          Sell
+          Purchase
         </Button>
 
         <Modal
@@ -412,9 +428,9 @@ async function sendNotification(itemName, salesDate) {
                       salesDoc.status === "Overdue"
                         ? "red"
                         : salesDoc.status === "Paid"
-                        ? "darkgreen"
+                        ? "green"
                         : "black",
-                    fontWeight: salesDoc.status === "Open" ? "bold" : "normal",
+                    fontWeight: "bold",
                   }}
                 >
                   {salesDoc.status}
@@ -430,7 +446,7 @@ async function sendNotification(itemName, salesDate) {
                     Delete
                   </Button>
                   <Modal
-                    show={show1}
+                    show={showDeleteModal}
                     onHide={handleCloseDelete}
                     backdrop="static"
                     keyboard={false}
@@ -449,10 +465,7 @@ async function sendNotification(itemName, salesDate) {
                       <Button
                         variant="danger"
                         onClick={() => {
-                          if (itemToDelete) {
-                            deleteEntry(itemToDelete); // Pass the stored ID to delete
-                          }
-                          handleCloseDelete();
+                          deleteEntry(itemToDelete);
                         }}
                       >
                         Delete
