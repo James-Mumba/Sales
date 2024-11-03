@@ -13,6 +13,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   query,
   setDoc,
@@ -25,9 +26,21 @@ function Sales() {
   const auth = getAuth(app);
   const navigate = useNavigate();
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (!user) navigate("/Signin");
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDoc = await getDocs(
+          query(collection(db, "users"), where("uid", "==", user.uid))
+        );
+        if (!userDoc.empty) {
+          const userData = userDoc.docs[0].data();
+          setIsAdmin(userData.role === "admin");
+        }
+      } else {
+        navigate("/Signin");
+      }
     });
     return () => unsub();
   }, [auth, navigate]);
@@ -408,7 +421,8 @@ function Sales() {
               <th>Customer's Name'</th>
               <th>Amount Due</th>
               <th>Status</th>
-              <th>Edit Data</th>
+              {isAdmin && <th>Edit Data</th>}{" "}
+              {/* Only display if user is admin */}
               <th>Action</th>
             </tr>
           </thead>
@@ -435,44 +449,41 @@ function Sales() {
                 >
                   {salesDoc.status}
                 </td>
-                <td>
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      setItemToDelete(salesDoc.id); // Store the ID of the item to be deleted
-                      handleShowDelete();
-                    }}
-                  >
-                    Delete
-                  </Button>
-                  <Modal
-                    show={showDeleteModal}
-                    onHide={handleCloseDelete}
-                    backdrop="static"
-                    keyboard={false}
-                  >
-                    <Modal.Header closeButton>
-                      <Modal.Title>Delete</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body className="delete-modal">
-                      <p>Deleting Entry</p>
-                      <p> Are you sure?</p>
-                    </Modal.Body>
-                    <Modal.Footer>
-                      <Button variant="secondary" onClick={handleCloseDelete}>
-                        Close
-                      </Button>
-                      <Button
-                        variant="danger"
-                        onClick={() => {
-                          deleteEntry(itemToDelete);
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </Modal.Footer>
-                  </Modal>
-                </td>
+
+                {isAdmin && (
+                  <td>
+                    <Button
+                      variant="danger"
+                      onClick={() => handleShowDelete(salesDoc.id)}
+                    >
+                      Delete
+                    </Button>
+                    <Modal
+                      show={showDeleteModal}
+                      onHide={handleCloseDelete}
+                      backdrop="static"
+                      keyboard={false}
+                    >
+                      <Modal.Header closeButton>
+                        <Modal.Title>Delete</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        <p>Are you sure you want to delete this entry?</p>
+                      </Modal.Body>
+                      <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseDelete}>
+                          Close
+                        </Button>
+                        <Button
+                          variant="danger"
+                          onClick={() => deleteEntry(itemToDelete)}
+                        >
+                          Delete
+                        </Button>
+                      </Modal.Footer>
+                    </Modal>
+                  </td>
+                )}
                 <td>
                   <Button
                     variant="warning"
