@@ -41,7 +41,7 @@ function Inventory() {
 
   const [showClearMessage, setShowClearMessage] = useState(false); // State to manage "All Clear" message
 
-  // Centralized Authentication Check
+  // Authentication Check
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -54,7 +54,7 @@ function Inventory() {
     return () => unsubscribe();
   }, [auth, navigate]);
 
-  // Fetch Inventory Data
+  // Fetch my Inventory Data
   const fetchInventory = async (userId) => {
     const q = query(
       collection(db, "store-Inventory"),
@@ -81,7 +81,7 @@ function Inventory() {
       };
 
       await addDoc(collection(db, "store-Inventory"), newInventoryData);
-      fetchInventory(userId); // Re-fetch after adding new item
+      fetchInventory(userId); 
       setShow(false);
     }
   };
@@ -108,12 +108,12 @@ function Inventory() {
       };
 
       await updateDoc(doc(db, "store-Inventory", updateItem.id), updatedData);
-      fetchInventory(userId); // Refresh inventory after update
+      fetchInventory(userId);
       setShow(false);
     }
   };
 
-  // Fetch Notifications
+  // Notifications
   useEffect(() => {
     const fetchNotifications = async () => {
       const notificationSnapshot = await getDocs(
@@ -177,7 +177,6 @@ function Inventory() {
                   <td>{item.Portion}</td>
                   <td>
                     <Button
-                      // variant="warning"
                       onClick={() => handleUpdateShow(item)}
                     >
                       <FontAwesomeIcon className="pen" icon={faFilePen} />

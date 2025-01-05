@@ -1,4 +1,100 @@
-import React, { useRef } from "react";
+// import React, { useRef } from "react";
+// import { Button, Form } from "react-bootstrap";
+// import { useNavigate } from "react-router-dom";
+// import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+// import { app, db } from "../Firebase";
+// import { doc, setDoc } from "firebase/firestore";
+
+// function Signup() {
+//   const userNameRef = useRef();
+//   const emailRef = useRef();
+//   const passwordRef = useRef();
+
+//   const auth = getAuth(app);
+//   const navigate = useNavigate();
+
+//   // Function to handle sign-up
+//   function getin() {
+//     const person = userNameRef.current.value;
+//     const email = emailRef.current.value;
+//     const password = passwordRef.current.value;
+
+//     createUserWithEmailAndPassword(auth, email, password).then(
+//       (usercredential) => {
+//         const userId = usercredential.user.uid;
+//         console.log(userId);
+
+//         // Determine the role based on the email (you can modify this logic)
+//         const role = email === "admin@example.com" ? "admin" : "user"; // Example condition for admin role
+
+//         // Create a document for the new user in Firestore
+//         const userDoc = doc(db, "clients-Data", userId);
+
+//         // Add user data and role to Firestore
+//         setDoc(userDoc, {
+//           user: person,
+//           email: email,
+//           userId: userId,
+//           role: role, // Adding the user's role to Firestore
+//         })
+//           .then(() => {
+//             // Navigate to the Home page after sign-up
+//             navigate("/Home");
+//           })
+//           .catch((error) => {
+//             const errorMessage = error.message;
+//             console.log(errorMessage);
+//           });
+//       }
+//     );
+//   }
+
+//   return (
+//     <div className="signup">
+//       <div className="box">
+//         <div className="profile">
+//           <button>Ad</button>
+//         </div>
+//         <Form.Group>
+//           <Form.Label></Form.Label>
+//           <Form.Control
+//             className="bar"
+//             type="text"
+//             ref={userNameRef}
+//             placeholder="john john"
+//           />
+//         </Form.Group>
+//         <br />
+//         <Form.Group>
+//           <Form.Label></Form.Label>
+//           <Form.Control
+//             className="bar"
+//             type="email"
+//             ref={emailRef}
+//             placeholder="name@gmail.com"
+//           />
+//         </Form.Group>
+//         <br />
+//         <Form.Group>
+//           <Form.Label></Form.Label>
+//           <Form.Control
+//             className="bar"
+//             type="password"
+//             ref={passwordRef}
+//             placeholder="******"
+//           />
+//         </Form.Group>
+//         <br />
+//         <Button onClick={getin}>Sign Up</Button>
+//         <p onClick={() => navigate("/Signin")}>Already have an account?</p>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default Signup;
+
+import React, { useRef, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
@@ -9,10 +105,12 @@ function Signup() {
   const userNameRef = useRef();
   const emailRef = useRef();
   const passwordRef = useRef();
+  const [isAdmin /*setIsAdmin*/] = useState(false); // State to handle admin checkbox
 
   const auth = getAuth(app);
   const navigate = useNavigate();
 
+  // Function to handle sign-up
   function getin() {
     const person = userNameRef.current.value;
     const email = emailRef.current.value;
@@ -23,15 +121,22 @@ function Signup() {
         const userId = usercredential.user.uid;
         console.log(userId);
 
+        // Determine the role based on the checkbox or email condition
+        const role =
+          isAdmin || email === "admin@example.com" ? "admin" : "user"; // Example admin condition
+
+        // Create a document for the new user in Firestore
         const userDoc = doc(db, "clients-Data", userId);
 
+        // Add user data and role to Firestore
         setDoc(userDoc, {
           user: person,
           email: email,
           userId: userId,
+          role: role, // Adding the user's role to Firestore
         })
           .then(() => {
-            // window.location.reload();
+            // Navigate to the Home page after sign-up
             navigate("/Home");
           })
           .catch((error) => {
@@ -54,7 +159,7 @@ function Signup() {
             className="bar"
             type="text"
             ref={userNameRef}
-            placeholder="john john"
+            placeholder="John Doe"
           />
         </Form.Group>
         <br />
@@ -78,8 +183,18 @@ function Signup() {
           />
         </Form.Group>
         <br />
+        {/* Checkbox to mark the user as admin */}
+        {/* <Form.Group controlId="formIsAdmin" className="mt-3">
+          <Form.Check
+            type="checkbox"
+            label="Register as Admin"
+            checked={isAdmin}
+            onChange={() => setIsAdmin(!isAdmin)}
+          />
+        </Form.Group>
+        <br /> */}
         <Button onClick={getin}>Sign Up</Button>
-        <p onClick={() => navigate("/Signin")}>Don't have an account?</p>
+        <p onClick={() => navigate("/Signin")}>Already have an account?</p>
       </div>
     </div>
   );

@@ -13,7 +13,6 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDoc,
   getDocs,
   query,
   setDoc,
@@ -26,24 +25,77 @@ function Sales() {
   const auth = getAuth(app);
   const navigate = useNavigate();
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isAdmin /* setIsAdmin*/] = useState(false);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const userDoc = await getDocs(
-          query(collection(db, "users"), where("uid", "==", user.uid))
-        );
-        if (!userDoc.empty) {
-          const userData = userDoc.docs[0].data();
-          setIsAdmin(userData.role === "admin");
-        }
+    const unsub = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        const fetchSalesData = async () => {
+          const q = query(
+            collection(db, "Sales-Data"),
+            where("userId", "==", currentUser.uid)
+          );
+          const querySnapshot = await getDocs(q);
+          const fetchedSales = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setSales(fetchedSales);
+          calculatePaidTotals(fetchedSales);
+        };
+        fetchSalesData();
       } else {
         navigate("/Signin");
       }
     });
+
     return () => unsub();
   }, [auth, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchData = async () => {
+      const q = query(
+        collection(db, "Sales-Data"),
+        where("userId", "==", user.uid)
+      );
+      let saleItems = [];
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((salesDoc) => {
+        saleItems.push({ id: salesDoc.id, ...salesDoc.data() });
+      });
+      setSales(saleItems);
+    };
+    fetchData();
+  }, [user]);
+
+  //query sales
+
+  const handleQuery = async (id) => {
+    try {
+      const saleToQuery = sales.find((sale) => sale.id === id);
+      if (!saleToQuery) return;
+
+      const queriedDocRef = doc(collection(db, "queried_sales"));
+      await setDoc(queriedDocRef, {
+        saleId: id,
+        saleDetails: saleToQuery,
+        timestamp: new Date(),
+      });
+
+      setQueriedItems((prev) => {
+        const updatedQueries = [...prev, id];
+        localStorage.setItem("queriedItems", JSON.stringify(updatedQueries));
+        return updatedQueries;
+      });
+      console.log("Sale queried successfully!");
+    } catch (error) {
+      console.error("Error querying sale:", error);
+    }
+  };
 
   const [show, setShow] = useState(false);
   const [sales, setSales] = useState([]);
@@ -54,7 +106,11 @@ function Sales() {
   const [totalPaidCount, setTotalPaidCount] = useState(0);
   const [totalPaidAmount, setTotalPaidAmount] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState(null);
+  const [itemToDelete] = useState(null);
+  const [queriedItems, setQueriedItems] = useState(() => {
+    const savedQueries = localStorage.getItem("queriedItems");
+    return savedQueries ? JSON.parse(savedQueries) : [];
+  });
 
   const itemRef = useRef();
   const numberOfPcsRef = useRef();
@@ -76,7 +132,7 @@ function Sales() {
     "Choma Sausages pack": 2450,
     "Choma Sausage 2@": 350,
     "Burger Patti 1@": 220,
-    "Samosa ": 75,
+    "Beef Samosa": 75,
     "Omellete ": 150,
     "Omellete, Tea/ Coffee": 400,
     "Tea/ Coffee": 250,
@@ -134,25 +190,17 @@ function Sales() {
 
   async function handleSale(selectedItems, portionsSold) {
     const salesDate = new Date().toLocaleString();
-
     try {
-      // Fetch all items from the inventory
       const inventorySnapshot = await getDocs(
         collection(db, "store-Inventory")
       );
       let matchedItems = [];
-
-      // Loop through each inventory item to find partial matches
       inventorySnapshot.forEach((doc) => {
         const inventoryItem = doc.data();
         const inventoryProductName = inventoryItem.Product.toLowerCase();
-
-        // Check if the inventory item name contains parts of the selected item
         const isMatch = selectedItems.some((selected) => {
           const selectedItemName = selected.toLowerCase();
           const selectedWords = selectedItemName.split(" ");
-
-          // Match on exact or partial words (first or first two words)
           return (
             inventoryProductName.includes(selectedItemName) ||
             inventoryProductName.includes(
@@ -164,8 +212,6 @@ function Sales() {
               ))
           );
         });
-
-        // If matched, push the inventory item to the list
         if (isMatch) {
           matchedItems.push({ id: doc.id, ...inventoryItem });
         }
@@ -184,8 +230,6 @@ function Sales() {
             alert(`Not enough portions for ${item.Product}`);
           }
         }
-      } else {
-        alert("No matching items found in inventory.");
       }
     } catch (error) {
       console.error("Error selling items:", error.message);
@@ -263,8 +307,8 @@ function Sales() {
       setSales(updatedSales);
     };
 
-    const intervalId = setInterval(checkForOverdueSales, 1 * 60 * 1000); // Check every minute
-    return () => clearInterval(intervalId); // Cleanup interval on component unmount
+    const intervalId = setInterval(checkForOverdueSales, 1 * 60 * 1000); 
+    return () => clearInterval(intervalId);
   }, [sales]);
 
   const handlePaymentReceived = async (id) => {
@@ -326,8 +370,8 @@ function Sales() {
               <span className="painNumber">{totalPaidCount}</span>Paid
             </p>
             <p>
-              Available Bal. Ksh
-              <span className="paidTotal">{totalPaidAmount}</span>
+              Total Sales Ksh
+              <span className="paidTotal"> {totalPaidAmount}</span>
             </p>
           </div>
         </div>
@@ -422,13 +466,28 @@ function Sales() {
               <th>Amount Due</th>
               <th>Status</th>
               {isAdmin && <th>Edit Data</th>}{" "}
-              {/* Only display if user is admin */}
+              {/*if user is admin */}
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {sales.map((salesDoc, index) => (
-              <tr key={salesDoc.id}>
+              <tr
+                key={salesDoc.id}
+                className={
+                  queriedItems.includes(salesDoc.id)
+                    ? "row-queried"
+                    : "row-default"
+                }
+                style={{
+                  backgroundColor: queriedItems.includes(salesDoc.id)
+                    ? "grey"
+                    : "white",
+                  color: queriedItems.includes(salesDoc.id)
+                    ? "lightgrey"
+                    : "black",
+                }}
+              >
                 <td>{index + 1}</td>
                 <td>{new Date(salesDoc.date).toLocaleDateString("en-GB")}</td>
                 <td>{salesDoc.item}</td>
@@ -485,13 +544,25 @@ function Sales() {
                   </td>
                 )}
                 <td>
-                  <Button
-                    variant="warning"
-                    onClick={() => handlePaymentReceived(salesDoc.id)}
-                    disabled={salesDoc.paymentReceived}
-                  >
-                    $$Received
-                  </Button>
+                  {salesDoc.paymentReceived ? null : (
+                    <Button
+                      variant="warning"
+                      onClick={() => handlePaymentReceived(salesDoc.id)}
+                      disabled={queriedItems.includes(salesDoc.id)}
+                    >
+                      $$ Receive
+                    </Button>
+                  )}
+                  {!queriedItems.includes(salesDoc.id) && (
+                    <Button
+                      className="query"
+                      onClick={() => handleQuery(salesDoc.id)}
+                      disabled={salesDoc.paymentReceived}
+                    >
+                      Query
+                    </Button>
+                  )}
+
                   {salesDoc.status === "Paid" && (
                     <Button
                       variant="danger"

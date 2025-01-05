@@ -7,7 +7,7 @@ import Signin from "./Pages/Signin";
 import Home from "./Pages/Home";
 import Inventroy from "./Pages/Inventroy";
 import Sales from "./Pages/Sales";
-// import Restock from "./Pages/Restock";
+import Boss from "./Pages/Boss";
 
 function App() {
   return (
@@ -18,8 +18,8 @@ function App() {
           <Route path="/Signin" element={<Signin />} />
           <Route path="/Home" element={<Home />} />
           <Route path="/Inventroy" element={<Inventroy />} />
-          {/* <Route path="/Requisition" element={<Restock />} /> */}
           <Route path="/Sales" element={<Sales />} />
+          <Route path="/Boss" element={<Boss />} />
         </Routes>
       </BrowserRouter>
     </div>
