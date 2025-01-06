@@ -97,7 +97,7 @@ function Sidebar() {
         Admin
       </button>
       {error && <p style={{ color: "red" }}>{error}</p>}
-      <Link className="click" to={"/Records"}>
+      <Link className="click" to={"####"}>
         Records
       </Link>
       <button className="out" onClick={out}>
