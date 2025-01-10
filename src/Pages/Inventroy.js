@@ -81,7 +81,7 @@ function Inventory() {
       };
 
       await addDoc(collection(db, "store-Inventory"), newInventoryData);
-      fetchInventory(userId); 
+      fetchInventory(userId);
       setShow(false);
     }
   };
@@ -144,12 +144,12 @@ function Inventory() {
   return (
     <div className="inventory">
       <Sidebar />
-      <div className="content">
+      <div className="content2">
         <Navbar />
 
         {/* Inventory List */}
         <div className="inventory-list">
-          <h4>Inventory</h4>
+          <h4 className="inv">Inventory</h4>
           <Button onClick={() => setShow(true)} className="add-item-btn">
             <FontAwesomeIcon icon={faPlus} /> Add Stock
           </Button>
@@ -176,9 +176,7 @@ function Inventory() {
                   <td>{item.Weight}</td>
                   <td>{item.Portion}</td>
                   <td>
-                    <Button
-                      onClick={() => handleUpdateShow(item)}
-                    >
+                    <Button onClick={() => handleUpdateShow(item)}>
                       <FontAwesomeIcon className="pen" icon={faFilePen} />
                     </Button>
                     <Button

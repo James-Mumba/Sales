@@ -10,13 +10,52 @@ import {
   query,
   orderBy,
   deleteDoc,
+  limit,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "../Firebase";
 
 function Boss({ queriedSales, onDismiss }) {
   const [queriedSalesList, setQueriedSales] = useState([]);
+  const [bestSellers, setBestSellers] = useState([]);
+  const [loadingBestSellers, setLoadingBestSellers] = useState(true);
 
+  //best seller
+  const fetchBestSellers = async () => {
+    setLoadingBestSellers(true);
+    try {
+      const salesCollection = collection(db, "Sales-Data");
+      where("status", "==", "paid");
+      const q = query(salesCollection, orderBy("price", "desc"), limit(5));
+      const querySnapshot = await getDocs(q);
+      const bestSellerData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      bestSellerData.sort((a, b) => b.price * b.pieces - a.price * a.pieces);
+      setBestSellers(bestSellerData);
+    } catch (error) {
+      console.error("Error fetching best seller:", error);
+    } finally {
+      setLoadingBestSellers(false);
+    }
+  };
+
+  //fetch every 30 mins
+  useEffect(() => {
+    fetchBestSellers();
+    const interval = setInterval(() => {
+      fetchBestSellers();
+    }, 30 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleRefreshBestSellers = () => {
+    fetchBestSellers();
+  };
+
+  //fetching queried sales data
   useEffect(() => {
     const fetchQueriedData = async () => {
       try {
@@ -44,7 +83,7 @@ function Boss({ queriedSales, onDismiss }) {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log("Queried sales data:", queriedData);
+      // console.log("Queried sales data:", queriedData);
       setQueriedSales(queriedData);
     });
 
@@ -137,7 +176,9 @@ function Boss({ queriedSales, onDismiss }) {
                         <p id="item">
                           {sale.saleDetails?.item || "Unknown Item"}
                         </p>
-                        <p id="pieces">{sale.saleDetails?.pieces || "N/A"}</p>
+                        <p id="pieces">
+                          {sale.saleDetails?.pieces || "N/A"}ptn
+                        </p>
                         <button
                           className="no-error"
                           onClick={() => handleDismiss(sale)}
@@ -162,15 +203,36 @@ function Boss({ queriedSales, onDismiss }) {
               <div className="books">
                 <div className="bookstitle">
                   <h6>Best Seller</h6>
-                  <button className="cash-in">Earnings</button>
+                  <button
+                    className="cash-in"
+                    onClick={handleRefreshBestSellers}
+                  >
+                    Earnings
+                  </button>
                 </div>
                 <div className="holder">
-                  <div className="booklist">
-                    <p className="p">Chuck Bone-in</p>
-                    <p className="p">
-                      <span className="color">ksh 2530</span>
-                    </p>
-                  </div>
+                  {loadingBestSellers ? (
+                    <p>Loading best sellers...</p>
+                  ) : bestSellers.length > 0 ? (
+                    bestSellers.map((bestSeller) => (
+                      <div key={bestSeller.id} className="booklist-item">
+                        <p className="p item">{bestSeller.item}</p>
+                        <p className="sellername">{bestSeller.pieces} ptns</p>
+                        <p className="p">
+                          <span className="color total">
+                            {(
+                              bestSeller.price * bestSeller.pieces
+                            ).toLocaleString("en-US", {
+                              style: "currency",
+                              currency: "ksh",
+                            })}
+                          </span>
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="nobest">No best sellers available.</p>
+                  )}
                 </div>
               </div>
               <div className="sales2day">

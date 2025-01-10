@@ -279,10 +279,13 @@
 }
 
 .container {
-  background: #f4f4f4;
+  /* background: #f4f4f4; */
   height: 100%;
   width: 100%;
   display: flex;
+  background-image: url(./Images/rb_61898.png);
+  background-size: cover;
+  background-position: center;
   flex-direction: column;
 }
 
@@ -300,7 +303,7 @@
   width: 500px;
   margin: 0 25px;
   border-radius: 15px;
-  background-color: rgb(253, 253, 253);
+  background-color: hsla(0, 0%, 79%, 0.563);
 }
 
 .left-half h4,
@@ -360,13 +363,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f4f4f4;
+  /* background: #f4f4f4; */
 }
 
 .inventory-Summary,
 .Product-details,
 .No-of-Users {
-  background: #fefefe;
+  background-color: hsla(0, 0%, 84%, 0.337);
   height: 220px;
   border-radius: 15px;
   width: 340px;
@@ -411,11 +414,12 @@
   height: 100dvh;
   width: 100dvw;
   display: flex;
-  background-color: rgb(171, 54, 33);
 }
 
-.content {
-  background-color: rgb(255, 255, 255);
+.content2 {
+  background-image: url(./Images/rb_61898.png);
+  background-position: center;
+  background-size: cover;
   height: 100%;
   width: 1324px;
 }
@@ -433,6 +437,19 @@
   justify-content: center;
   align-items: center;
   border-bottom: ridge;
+}
+
+.inv {
+  margin-top: 10px;
+  margin-left: 40px;
+  height: 35px;
+  width: 110px;
+  background: hsla(0, 0%, 36%, 0.803);
+  color: white;
+}
+
+.add-item-btn {
+  margin-left: 40px;
 }
 
 .small-top h4 {
@@ -629,7 +646,9 @@ log1:hover {
 }
 
 .content {
-  background-color: rgb(244, 244, 244);
+  background-image: url(./Images/rb_60158.png);
+  background-position: center;
+  background-size: cover;
   height: 100%;
   width: 90%;
   overflow-x: hidden;
@@ -637,12 +656,13 @@ log1:hover {
 
 .pay-page {
   height: 62px;
-  width: 100%;
+  width: 20%;
   display: flex;
+  float: right;
   align-items: center;
   justify-content: center;
   justify-content: space-between;
-  background: #f1f1f1;
+  /* background: #f1f1f1; */
   margin-bottom: 5px;
 }
 
@@ -665,7 +685,7 @@ log1:hover {
 
 .paid {
   height: 100%;
-  background: rgb(1, 201, 1);
+  background: hsla(42, 100%, 59%, 0.63);
   width: 300px;
   margin-right: 20px;
   cursor: pointer;
@@ -750,16 +770,19 @@ log1:hover {
 }
 
 .bar {
-  background: #000;
   height: 50px;
   width: 90%;
 }
 
 .down-low {
-  background-color: tomato;
-  height: 630px;
-  width: 99%;
+  margin: 5px 0;
+  background-position: center;
+  background-size: cover;
+  background-image: url(./Images/colorful-circles-dark-background.png);
+  height: 640px;
+  width: auto;
   display: flex;
+  margin-left: -8px;
   flex-direction: column;
   align-items: center;
 }
@@ -783,10 +806,10 @@ Carousel {
   height: 100%;
 }
 
-.carousel-caption {
+/* .carousel-caption {
   color: #fff;
   text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.7);
-}
+} */
 
 .carousel-indicators [data-bs-target] {
   background-color: #000;
@@ -806,7 +829,7 @@ Carousel {
   width: 1300px;
   display: flex;
   justify-content: space-around;
-  background-color: rgb(105, 128, 0);
+  /* background-color: rgb(246, 246, 246); */
 }
 
 .one {
@@ -819,16 +842,16 @@ Carousel {
   margin-top: 5px;
   border-radius: 5px;
   width: auto;
-  background-color: slategray;
+  background-color: rgb(227, 241, 255);
 }
+
 .Queries {
   margin-top: 10px;
   height: 270px;
   border-radius: 5px;
   width: auto;
   overflow-y: auto;
-
-  background-color: rgb(239, 239, 239);
+  background-color: hsla(201, 95%, 77%, 0.489);
 }
 .q-title {
   height: 35px;
@@ -839,23 +862,27 @@ Carousel {
   padding-left: 10px;
   align-items: center;
   margin-bottom: 10px;
+  color: white;
 }
 .q-content {
-  height: 55px;
-  width: 95%;
+  height: auto;
+  width: 94%;
   margin-bottom: 5px;
-  margin-left: 10px;
-  background-color: violet;
+  margin-left: 15px;
   padding-bottom: 4px;
 }
 .q-contenthead {
   display: flex;
   justify-content: space-evenly;
-  height: 50%;
+  height: 14%;
   width: auto;
   margin-top: 3px;
   padding-bottom: 1px;
-  background-color: #c4c4c4;
+  background-image: linear-gradient(
+    180deg,
+    rgb(206, 253, 255),
+    rgb(148, 148, 148)
+  );
 }
 .big {
   font-weight: 500;
@@ -911,7 +938,7 @@ Carousel {
 
 .books {
   height: 250px;
-  background-color: #f3f2f2;
+  background-color: hsla(201, 92%, 81%, 0.889);
 }
 
 .bookstitle {
@@ -944,19 +971,24 @@ Carousel {
   overflow-y: auto;
 }
 
-.booklist {
-  margin-top: 5px;
-  background-color: rgb(194, 194, 194);
-  height: 40px;
-  width: 98%;
+.booklist-item {
   display: flex;
-  margin-left: 5px;
-  border-radius: 5px;
-  padding-top: 5px;
   justify-content: space-between;
+  /* padding: 10px; */
+  height: 40px;
+  padding-left: 10px;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.662);
+  margin-bottom: 5px;
+  padding-top: 8px;
+  border-bottom: 1px solid #ddd;
+}
+.booklist-item:hover {
+  background-color: #f9f9f9;
 }
 
-.p {
+.p,
+.sellername {
   margin-left: 12px;
   font-weight: 550;
 }
@@ -966,11 +998,21 @@ Carousel {
   color: #ffffff;
   font-weight: 550;
   border-radius: 8px;
-  background-color: rgb(0, 199, 0);
+  margin-left: 20px;
+  color: rgb(0, 199, 0);
+}
+
+.nobest {
+  font-weight: 550;
+  color: #c2c2c2;
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+  margin-top: 14%;
 }
 
 .sales2day {
-  background-color: #f3f2f2;
+  background-color: hsla(201, 92%, 81%, 0.489);
   height: 210px;
   color: #dddddd;
 }
@@ -978,6 +1020,7 @@ Carousel {
 .blogstitle {
   color: #838383;
   font-weight: 550;
+  font-size: 18px;
   border-bottom-style: outset;
   height: 30px;
   padding-left: 20px;
@@ -987,7 +1030,7 @@ Carousel {
 .blog-container {
   height: 160px;
   width: 100%;
-  color: #717171;
+  color: #636363;
 }
 
 .bloghead {
