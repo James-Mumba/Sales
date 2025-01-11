@@ -147,7 +147,7 @@ function Navbar() {
                   key={notif.id}
                   onClick={() => handleNotificationClick(notif)} // Redirect on click
                 >
-                  <p>{notif.title}</p>
+                  {/* <p>{notif.title}</p> */}
                   <p>
                     {notif.item} - {notif.soldQuantity || notif.pieces} pieces
                   </p>
