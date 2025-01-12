@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { app, db } from "../Firebase";
 import { doc, setDoc } from "firebase/firestore";
+import { faFileImage } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function Signup() {
   const userNameRef = useRef();
@@ -52,10 +54,13 @@ function Signup() {
   }
 
   return (
-    <div className="signup">
+    <div className="sign">
       <div className="box">
         <div className="profile">
-          <button>Ad</button>
+          <button>
+            {" "}
+            <FontAwesomeIcon className="log" icon={faFileImage} />
+          </button>
         </div>
         <Form.Group>
           <Form.Label></Form.Label>

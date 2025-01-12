@@ -3,6 +3,8 @@ import React, { useRef } from "react";
 import { Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { app } from "../Firebase";
+import {  } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function Signin() {
   const emailRef = useRef();
@@ -28,7 +30,7 @@ function Signin() {
   }
 
   return (
-    <div>
+    <div className="sign">
       <div className="box">
         <div className="profile"></div>
         <Form.Group>

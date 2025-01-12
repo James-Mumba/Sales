@@ -3,12 +3,30 @@
   padding: 0;
 }
 
+.sign {
+  height: 100dvh;
+  width: 100dvw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-position: center;
+  background-size: cover;
+  background-image: url(./Images/lines.avif);
+  /* background: #000; */
+}
+
 .box {
-  height: 360px;
+  height: 500px;
   width: 500px;
-  margin-left: 33%;
-  margin-top: 10%;
-  position: absolute;
+  background: hsla(0, 0%, 96%, 0.016);
+  /* margin-left: 33%;
+  margin-top: 10%; */
+  /* position: absolute; */
+  background-image: radial-gradient(
+    hsla(0, 0%, 73%, 0.016),
+    hsla(0, 0%, 96%, 0.427)
+  );
+  border-radius: 15px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -18,6 +36,7 @@
 .box p {
   cursor: pointer;
   margin-top: 10px;
+  color: #efefef;
 }
 
 .bar {
@@ -30,7 +49,7 @@
 }
 
 .profile {
-  background: #000;
+  background: #000000;
   height: 80px;
   width: 80px;
   border-radius: 50%;
@@ -38,13 +57,18 @@
 }
 
 .profile button {
-  height: 16px;
+  height: 18px;
   width: 20px;
+  text-align: center;
+  background-position: center;
+  background-size: cover;
   border: none;
-  margin-top: 74%;
-  margin-left: 70%;
+  margin-top: 75%;
+  margin-left: 73%;
   border-radius: 4px;
   cursor: pointer;
+  background-color: inherit;
+  color: rgba(227, 227, 227, 0.652);
 }
 
 /* Navbar */
@@ -659,7 +683,6 @@ log1:hover {
   margin-left: 5px;
   color: #a7a7a7;
 }
-
 
 /* End of Inventory */
 
